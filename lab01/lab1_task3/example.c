@@ -1,0 +1,45 @@
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define NUM_THREADS sysconf(_SC_NPROCESSORS_CONF)
+
+void *f(void *arg) {
+  	long id = *(long*) arg;
+    int i;
+    for(i = 0; i < 100; i++) {
+        printf("Hello World din thread-ul %ld! Indicele iteratiei: %d\n", id, i + 1);
+    }
+  	
+  	pthread_exit(NULL);
+}
+
+int main(int argc, char *argv[]) {
+	pthread_t threads[NUM_THREADS];
+  	int r;
+  	long id;
+  	void *status;
+  	long arguments[NUM_THREADS];
+
+  	for (id = 0; id < NUM_THREADS; id++) {
+  		arguments[id] = id;
+		r = pthread_create(&threads[id], NULL, f, &arguments[id]);
+
+		if (r) {
+	  		printf("Eroare la crearea thread-ului %ld\n", id);
+	  		exit(-1);
+		}
+  	}
+
+  	for (id = 0; id < NUM_THREADS; id++) {
+		r = pthread_join(threads[id], &status);
+
+		if (r) {
+	  		printf("Eroare la asteptarea thread-ului %ld\n", id);
+	  		exit(-1);
+		}
+  	}
+
+  	pthread_exit(NULL);
+}

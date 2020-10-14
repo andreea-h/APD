@@ -1,0 +1,44 @@
+Pentru testare am comentat toate operatiile de afisare.
+
+
+Serial pentru 100 000 000 elemente
+real	0m0,570s
+
+Paralel pt 100 000 000 elemente //rulare cu 8 thread-uri
+real	0m0,414s
+
+Paralel pt 100 000 000 elemente //rulare cu 4 thread-uri
+real	0m0,421s
+--------------------------------------------------------------------------
+
+Serial pentru 1000 000 000 elemente 
+real	0m5,796s
+
+Paralel pentru 1000 000 000 elemente //rulare cu 8 thread-uri
+real	0m4,141s
+
+Paralel pentru 1000 000 000 elemente //rulare cu 6 thread-uri
+real	0m4,148s
+
+Paralel pentru 1000 000 000 elemente //rulare cu 3 thread-uri
+real	0m4,503s
+--------------------------------------------------------------------------
+
+Serial pentru 1050 000 000 elemente
+real	0m6,494s
+
+Paralel pentru 1050 000 000 elemente //rulare cu 8 thread-uri
+real	0m4,254s
+
+Paralel pentru 1050 000 000 elemente //rulare cu 3 thread-uri
+real	0m4,399s
+-------------------------------------------------------------------------
+
+Serial pentru 1500 000 000 elemente
+real	0m9,205s
+
+Paralel pentru 1500 000 000 elemente //rulare cu 8 thread-uri
+real	0m6,930s
+
+Paralel pentru 1500 000 000 elemente //rulare cu 3 thread-uri
+real	0m7,051s
