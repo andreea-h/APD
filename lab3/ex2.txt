@@ -1,0 +1,24 @@
+Timp de executie obtinut pentru Bubble Sort secvential: (N = 100000)
+real	0m41,520s
+
+
+//pentru testare am comentat partea cu qsort si apelul print()
+Timp de executie obtinut pentru OETS paralel: N = 100000, P = 3
+real	0m16,133s
+
+Timp de executie obtinut pentru OETS paralel: N = 100000, P = 4
+real	0m14,512s
+
+Timp de executie obtinut pentru OETS paralel: N = 100000, P = 8
+real	0m11,870s
+
+Timp de executie obtinut pentru OETS paralel: N = 10000, P = 8
+real	0m0,317s
+
+
+Timp de executie obtinut pentru OETS paralel: N = 50000, P = 8
+real	0m3,463s
+
+Timp de executie obtinut pentru OETS paralel: N = 50000, P = 2
+real	0m5,013s
+

@@ -1,0 +1,30 @@
+Timpi obtinuti pentru merge sort paralelizat:
+
+time ./merge $((2**25)) 2
+real	0m3,941s
+
+time ./merge $((2**25)) 4
+
+real	0m2,420s
+
+time ./merge $((2**25)) 8
+real	0m2,014s
+-------------------------
+time ./merge $((2**26)) 2
+real	0m8,065s
+
+time ./merge $((2**26)) 4
+real	0m4,945s
+
+time ./merge $((2**26)) 8
+real	0m4,826s
+-------------------------
+time ./merge $((2**27)) 2
+real	0m16,561s
+
+time ./merge $((2**27)) 4
+real	0m10,328s
+
+time ./merge $((2**27)) 8
+real	0m8,420s
+-------------------------
