@@ -15,8 +15,12 @@ char *in_filename_mandelbrot;
 char *out_filename_julia;
 char *out_filename_mandelbrot;
 int P; //numarul de thread-uri
-int **result;
-int width, height;
+int **result_julia;
+int width_julia, height_julia;
+pthread_barrier_t barrier;
+
+int **result_man;
+int width_man, height_man;
 pthread_barrier_t barrier;
 
 // structura pentru un numar complex
@@ -33,7 +37,8 @@ typedef struct _params {
 	int id; //id thread
 } params;
 
-params par;
+params par_julia;
+params par_man;
 
 // citeste argumentele programului
 void get_args(int argc, char **argv)
@@ -135,89 +140,41 @@ void *f(void *arg) {
 	long id = *(long *)arg;
 	//printf("Hello din thread-ul %ld!\n", id);
 
-	int start = id * (double) width / P;
-	int end = MIN ((id + 1) * (double) width / P, width);
+	int start_julia = id * (double) width_julia / P;
+	int end_julia = MIN ((id + 1) * (double) width_julia / P, width_julia);
 	int w, h, i;
 
-	for (w = start; w < end; w++) {
-		for (h = 0; h < height; h++) {
+	for (w = start_julia; w < end_julia; w++) {
+		for (h = 0; h < height_julia; h++) {
 			int step = 0;
-			complex z = { .a = w * par.resolution + par.x_min,
-							.b = h * par.resolution + par.y_min };
+			//z - punctul din planul complex in are definim multimea
+			complex z = { .a = w * par_julia.resolution + par_julia.x_min,
+							.b = h * par_julia.resolution + par_julia.y_min };
 
-			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par.iterations) {
+			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_julia.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
 
-				z.a = pow(z_aux.a, 2) - pow(z_aux.b, 2) + par.c_julia.a;
-				z.b = 2 * z_aux.a * z_aux.b + par.c_julia.b;
+				z.a = pow(z_aux.a, 2) - pow(z_aux.b, 2) + par_julia.c_julia.a;
+				z.b = 2 * z_aux.a * z_aux.b + par_julia.c_julia.b;
 
 				step++;
 			}
 
-			result[h][w] = step % 256;
+			result_julia[h][w] = step % 256;
 		}
 	}
 
-	//bariera
-	pthread_barrier_wait(&barrier);
-	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
-	if (id == P - 1) {
-		for (i = 0; i < height / 2; i++) {
-		int *aux = result[i];
-		result[i] = result[height - i - 1];
-		result[height- i - 1] = aux;
-		}
-	}
-	
-	pthread_barrier_wait(&barrier);
-	pthread_exit(NULL);
-}
+	int start_man = id * (double) width_man / P;
+	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
 
-// ruleaza algoritmul Julia
-void run_julia(params *par, int **result, int width, int height)
-{
-	int w, h, i;
-
-	for (w = 0; w < width; w++) {
-		for (h = 0; h < height; h++) {
-			int step = 0;
-			complex z = { .a = w * par->resolution + par->x_min,
-							.b = h * par->resolution + par->y_min };
-
-			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par->iterations) {
-				complex z_aux = { .a = z.a, .b = z.b };
-
-				z.a = pow(z_aux.a, 2) - pow(z_aux.b, 2) + par->c_julia.a;
-				z.b = 2 * z_aux.a * z_aux.b + par->c_julia.b;
-
-				step++;
-			}
-
-			result[h][w] = step % 256;
-		}
-	}
-
-	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
-	for (i = 0; i < height / 2; i++) {
-		int *aux = result[i];
-		result[i] = result[height - i - 1];
-		result[height - i - 1] = aux;
-	}
-}
-
-// ruleaza algoritmul Mandelbrot
-void run_mandelbrot(params *par, int **result, int width, int height)
-{
-	int w, h, i;
-
-	for (w = 0; w < width; w++) {
-		for (h = 0; h < height; h++) {
-			complex c = { .a = w * par->resolution + par->x_min,
-							.b = h * par->resolution + par->y_min };
+	for (w = start_man; w < end_man; w++) {
+		for (h = 0; h < height_man; h++) {
+			complex c = { .a = w * par_man.resolution + par_man.x_min,
+							.b = h * par_man.resolution + par_man.y_min };
 			complex z = { .a = 0, .b = 0 };
 			int step = 0;
 
-			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par->iterations) {
+			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
 
 				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
@@ -226,17 +183,33 @@ void run_mandelbrot(params *par, int **result, int width, int height)
 				step++;
 			}
 
-			result[h][w] = step % 256;
+			result_man[h][w] = step % 256;
 		}
 	}
 
-	// transforma rezultatul din coordonate matematice in coordonate ecran
-	for (i = 0; i < height / 2; i++) {
-		int *aux = result[i];
-		result[i] = result[height - i - 1];
-		result[height - i - 1] = aux;
+	//bariera
+	pthread_barrier_wait(&barrier);
+	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
+	if (id == P - 1) {
+		for (i = 0; i < height_julia / 2; i++) {
+			int *aux = result_julia[i];
+			result_julia[i] = result_julia[height_julia - i - 1];
+			result_julia[height_julia- i - 1] = aux;
+		}
+		for (i = 0; i < height_man / 2; i++) {
+			int *aux = result_man[i];
+			result_man[i] = result_man[height_man - i - 1];
+			result_man[height_man- i - 1] = aux;
+		}
+		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
+		write_output_file(out_filename_mandelbrot, result_man, width_man, height_man);
 	}
+	
+	pthread_barrier_wait(&barrier);
+	pthread_exit(NULL);
 }
+
+
 
 int main(int argc, char *argv[])
 {
@@ -251,12 +224,17 @@ int main(int argc, char *argv[])
 	// - se ruleaza algoritmul
 	// - se scrie rezultatul in fisierul de iesire
 	// - se elibereaza memoria alocata
-	read_input_file(in_filename_julia, &par);
+	read_input_file(in_filename_julia, &par_julia);
+	read_input_file(in_filename_mandelbrot, &par_man);
 
-	width = (par.x_max - par.x_min) / par.resolution;
-	height = (par.y_max - par.y_min) / par.resolution;
+	width_julia = (par_julia.x_max - par_julia.x_min) / par_julia.resolution;
+	height_julia = (par_julia.y_max - par_julia.y_min) / par_julia.resolution;
 
-	result = allocate_memory(width, height);
+	width_man = (par_man.x_max - par_man.x_min) / par_man.resolution;
+	height_man = (par_man.y_max - par_man.y_min) / par_man.resolution;
+
+	result_julia = allocate_memory(width_julia, height_julia);
+	result_man = allocate_memory(width_man, height_man);
 
 	pthread_barrier_init(&barrier, NULL, P);
 	long i;
@@ -277,29 +255,13 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-	
-	//trebuie paralelizate
-	//run_julia(&par, result, width, height);
+
 	pthread_barrier_destroy(&barrier);
-	write_output_file(out_filename_julia, result, width, height);
-	free_memory(result, height);
+	
+	free_memory(result_julia, height_julia);
+	free_memory(result_man, height_man);
 
 	pthread_exit(NULL);
-	// Mandelbrot:
-	// - se citesc parametrii de intrare
-	// - se aloca tabloul cu rezultatul
-	// - se ruleaza algoritmul
-	// - se scrie rezultatul in fisierul de iesire
-	// - se elibereaza memoria alocata
-	/*read_input_file(in_filename_mandelbrot, &par);
-
-	width = (par.x_max - par.x_min) / par.resolution;
-	height = (par.y_max - par.y_min) / par.resolution;
-
-	result = allocate_memory(width, height);
-	run_mandelbrot(&par, result, width, height);
-	write_output_file(out_filename_mandelbrot, result, width, height);
-	free_memory(result, height);
-*/
+	
 	return 0;
 }

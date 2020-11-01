@@ -215,15 +215,15 @@ int main(int argc, char *argv[])
 	// - se ruleaza algoritmul
 	// - se scrie rezultatul in fisierul de iesire
 	// - se elibereaza memoria alocata
-	//read_input_file(in_filename_mandelbrot, &par);
+	read_input_file(in_filename_mandelbrot, &par);
 
-	//width = (par.x_max - par.x_min) / par.resolution;
-	//height = (par.y_max - par.y_min) / par.resolution;
+	width = (par.x_max - par.x_min) / par.resolution;
+	height = (par.y_max - par.y_min) / par.resolution;
 
-	//result = allocate_memory(width, height);
-	//run_mandelbrot(&par, result, width, height);
-	//write_output_file(out_filename_mandelbrot, result, width, height);
-	//free_memory(result, height);
+	result = allocate_memory(width, height);
+	run_mandelbrot(&par, result, width, height);
+	write_output_file(out_filename_mandelbrot, result, width, height);
+	free_memory(result, height);
 
 	return 0;
 }
