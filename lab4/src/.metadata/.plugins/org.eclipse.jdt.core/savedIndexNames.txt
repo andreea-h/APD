@@ -1,0 +1,4 @@
+INDEX VERSION 1.131+/home/andreea/Desktop/An3/APD/lab4/src/.metadata/.plugins/org.eclipse.jdt.core
+451215611.index
+3553248909.index
+2764928539.index
