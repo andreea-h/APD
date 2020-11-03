@@ -18,6 +18,10 @@ int P; //numarul de thread-uri
 int **result_julia;
 int width_julia, height_julia;
 pthread_barrier_t barrier;
+pthread_barrier_t barrier1;
+pthread_barrier_t barrier2;
+pthread_barrier_t barrier3;
+pthread_barrier_t barrier4;
 
 int **result_man;
 int width_man, height_man;
@@ -93,7 +97,7 @@ void write_output_file(char *out_filename, int **result, int width, int height)
 	fprintf(file, "P2\n%d %d\n255\n", width, height);
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
-			fprintf(file, "%d ", result[i][j]);
+			fprintf(file, "%d ", result[height - i - 1][j]);
 		}
 		fprintf(file, "\n");
 	}
@@ -138,11 +142,32 @@ void free_memory(int **result, int height)
 void *f(void *arg) {
 
 	long id = *(long *)arg;
-	//printf("Hello din thread-ul %ld!\n", id);
+
+	int i;
+	int start_man = id * (double) width_man / P;
+	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
 
 	int start_julia = id * (double) width_julia / P;
 	int end_julia = MIN ((id + 1) * (double) width_julia / P, width_julia);
-	int w, h, i;
+	int w, h;
+
+	for (i = start_julia; i < height_julia; i++) {
+		result_julia[i] = malloc(width_julia * sizeof(int));
+		if (result_julia[i] == NULL) {
+			printf("Eroare la malloc!\n");
+			exit(1);
+		}
+	}
+
+	for (i = start_man; i < height_man; i++) {
+		result_man[i] = malloc(width_man * sizeof(int));
+		if (result_man[i] == NULL) {
+			printf("Eroare la malloc!\n");
+			exit(1);
+		}
+	}
+	//inainte de a trece mai departe, trebuie sa se termine alocarile
+	pthread_barrier_wait(&barrier);
 
 	for (w = start_julia; w < end_julia; w++) {
 		for (h = 0; h < height_julia; h++) {
@@ -164,8 +189,11 @@ void *f(void *arg) {
 		}
 	}
 
-	int start_man = id * (double) width_man / P;
-	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
+	pthread_barrier_wait(&barrier1);
+	if (id == 0) {
+		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
+	}
+	pthread_barrier_wait(&barrier1);
 
 	for (w = start_man; w < end_man; w++) {
 		for (h = 0; h < height_man; h++) {
@@ -188,24 +216,13 @@ void *f(void *arg) {
 	}
 
 	//bariera
-	pthread_barrier_wait(&barrier);
+	pthread_barrier_wait(&barrier2);
 	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
-	if (id == P - 1) {
-		for (i = 0; i < height_julia / 2; i++) {
-			int *aux = result_julia[i];
-			result_julia[i] = result_julia[height_julia - i - 1];
-			result_julia[height_julia- i - 1] = aux;
-		}
-		for (i = 0; i < height_man / 2; i++) {
-			int *aux = result_man[i];
-			result_man[i] = result_man[height_man - i - 1];
-			result_man[height_man- i - 1] = aux;
-		}
-		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
+	if (id == 0) {
 		write_output_file(out_filename_mandelbrot, result_man, width_man, height_man);
 	}
-	
-	pthread_barrier_wait(&barrier);
+	pthread_barrier_wait(&barrier2);
+
 	pthread_exit(NULL);
 }
 
@@ -233,14 +250,17 @@ int main(int argc, char *argv[])
 	width_man = (par_man.x_max - par_man.x_min) / par_man.resolution;
 	height_man = (par_man.y_max - par_man.y_min) / par_man.resolution;
 
-	result_julia = allocate_memory(width_julia, height_julia);
-	result_man = allocate_memory(width_man, height_man);
+	result_julia = (int **)malloc(height_julia * sizeof(int *));
+	result_man = (int **)malloc(height_man * sizeof(int *));
 
 	pthread_barrier_init(&barrier, NULL, P);
+	pthread_barrier_init(&barrier1, NULL, P);
+	pthread_barrier_init(&barrier2, NULL, P);
+
+
 	long i;
 	for (i = 0; i < P; i++) {
 		arguments[i] = i;
-		//printf("(main)%ld\n", arguments[i]);
 		int r = pthread_create(&threads[i], NULL, f, (void *)&arguments[i]);
 		if (r != 0) {
 			printf("Eroare la crearea unui thread!\n");
@@ -255,11 +275,12 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-
 	pthread_barrier_destroy(&barrier);
+	pthread_barrier_destroy(&barrier1);
+	pthread_barrier_destroy(&barrier2);
 	
-	free_memory(result_julia, height_julia);
-	free_memory(result_man, height_man);
+	//free_memory(result_julia, height_julia);
+	//free_memory(result_man, height_man);
 
 	pthread_exit(NULL);
 	
