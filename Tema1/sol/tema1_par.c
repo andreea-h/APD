@@ -176,10 +176,10 @@ void *f(void *arg) {
 			complex z = { .a = w * par_julia.resolution + par_julia.x_min,
 							.b = h * par_julia.resolution + par_julia.y_min };
 
-			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_julia.iterations) {
+			while (sqrt((z.a) * (z.a) + (z.b) * (z.b)) < 2.0 && step < par_julia.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
 
-				z.a = pow(z_aux.a, 2) - pow(z_aux.b, 2) + par_julia.c_julia.a;
+				z.a = z_aux.a * z_aux.a - z_aux.b * z_aux.b + par_julia.c_julia.a;
 				z.b = 2 * z_aux.a * z_aux.b + par_julia.c_julia.b;
 
 				step++;
@@ -189,11 +189,11 @@ void *f(void *arg) {
 		}
 	}
 
-	pthread_barrier_wait(&barrier1);
+	pthread_barrier_wait(&barrier);
 	if (id == 0) {
 		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
 	}
-	pthread_barrier_wait(&barrier1);
+	pthread_barrier_wait(&barrier);
 
 	for (w = start_man; w < end_man; w++) {
 		for (h = 0; h < height_man; h++) {
@@ -202,10 +202,10 @@ void *f(void *arg) {
 			complex z = { .a = 0, .b = 0 };
 			int step = 0;
 
-			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_man.iterations) {
+			while (sqrt((z.a) * (z.a) + (z.b) * (z.b)) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
 
-				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
+				z.a = z_aux.a * z_aux.a - z_aux.b * z_aux.b + c.a;
 				z.b = 2.0 * z_aux.a * z_aux.b + c.b;
 
 				step++;
@@ -216,12 +216,12 @@ void *f(void *arg) {
 	}
 
 	//bariera
-	pthread_barrier_wait(&barrier2);
+	pthread_barrier_wait(&barrier);
 	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
 	if (id == 0) {
 		write_output_file(out_filename_mandelbrot, result_man, width_man, height_man);
 	}
-	pthread_barrier_wait(&barrier2);
+	pthread_barrier_wait(&barrier);
 
 	pthread_exit(NULL);
 }
@@ -254,8 +254,8 @@ int main(int argc, char *argv[])
 	result_man = (int **)malloc(height_man * sizeof(int *));
 
 	pthread_barrier_init(&barrier, NULL, P);
-	pthread_barrier_init(&barrier1, NULL, P);
-	pthread_barrier_init(&barrier2, NULL, P);
+	//pthread_barrier_init(&barrier1, NULL, P);
+	//pthread_barrier_init(&barrier2, NULL, P);
 
 
 	long i;
@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
 		}
 	}
 	pthread_barrier_destroy(&barrier);
-	pthread_barrier_destroy(&barrier1);
-	pthread_barrier_destroy(&barrier2);
+	//pthread_barrier_destroy(&barrier1);
+	//pthread_barrier_destroy(&barrier2);
 	
 	//free_memory(result_julia, height_julia);
 	//free_memory(result_man, height_man);
