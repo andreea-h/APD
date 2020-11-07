@@ -22,10 +22,14 @@ pthread_barrier_t barrier1;
 pthread_barrier_t barrier2;
 pthread_barrier_t barrier3;
 pthread_barrier_t barrier4;
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+
 
 int **result_man;
 int width_man, height_man;
 pthread_barrier_t barrier;
+pthread_mutex_t mutex1, mutex2;
 
 // structura pentru un numar complex
 typedef struct _complex {
@@ -140,9 +144,7 @@ void free_memory(int **result, int height)
 }
 
 void *f(void *arg) {
-
 	long id = *(long *)arg;
-
 	int i;
 	int start_man = id * (double) width_man / P;
 	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
@@ -170,6 +172,7 @@ void *f(void *arg) {
 	pthread_barrier_wait(&barrier);
 
 	for (w = start_julia; w < end_julia; w++) {
+		
 		for (h = 0; h < height_julia; h++) {
 			int step = 0;
 			//z - punctul din planul complex in are definim multimea
@@ -181,10 +184,9 @@ void *f(void *arg) {
 
 				z.a = z_aux.a * z_aux.a - z_aux.b * z_aux.b + par_julia.c_julia.a;
 				z.b = 2 * z_aux.a * z_aux.b + par_julia.c_julia.b;
-
 				step++;
 			}
-
+			
 			result_julia[h][w] = step % 256;
 		}
 	}
@@ -193,8 +195,7 @@ void *f(void *arg) {
 	if (id == 0) {
 		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
 	}
-	pthread_barrier_wait(&barrier);
-
+	
 	for (w = start_man; w < end_man; w++) {
 		for (h = 0; h < height_man; h++) {
 			complex c = { .a = w * par_man.resolution + par_man.x_min,
@@ -202,16 +203,13 @@ void *f(void *arg) {
 			complex z = { .a = 0, .b = 0 };
 			int step = 0;
 
-			while (sqrt((z.a) * (z.a) + (z.b) * (z.b)) < 2.0 && step < par_man.iterations) {
+			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
-
-				z.a = z_aux.a * z_aux.a - z_aux.b * z_aux.b + c.a;
+				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
 				z.b = 2.0 * z_aux.a * z_aux.b + c.b;
-
 				step++;
 			}
-
-			result_man[h][w] = step % 256;
+			result_man[h][w] = step % 256; 
 		}
 	}
 
@@ -221,26 +219,17 @@ void *f(void *arg) {
 	if (id == 0) {
 		write_output_file(out_filename_mandelbrot, result_man, width_man, height_man);
 	}
-	pthread_barrier_wait(&barrier);
 
 	pthread_exit(NULL);
 }
 
 
-
 int main(int argc, char *argv[])
 {
-	
-	// se citesc argumentele programului
 	get_args(argc, argv);
 	long arguments[P];
 	pthread_t threads[P];
-	// Julia:
-	// - se citesc parametrii de intrare
-	// - se aloca tabloul cu rezultatul
-	// - se ruleaza algoritmul
-	// - se scrie rezultatul in fisierul de iesire
-	// - se elibereaza memoria alocata
+	
 	read_input_file(in_filename_julia, &par_julia);
 	read_input_file(in_filename_mandelbrot, &par_man);
 
@@ -254,10 +243,7 @@ int main(int argc, char *argv[])
 	result_man = (int **)malloc(height_man * sizeof(int *));
 
 	pthread_barrier_init(&barrier, NULL, P);
-	//pthread_barrier_init(&barrier1, NULL, P);
-	//pthread_barrier_init(&barrier2, NULL, P);
-
-
+	
 	long i;
 	for (i = 0; i < P; i++) {
 		arguments[i] = i;
@@ -267,7 +253,7 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-	
+
 	for (i = 0; i < P; i++) {
 		int r = pthread_join(threads[i], NULL);
 		if (r != 0) {
@@ -276,11 +262,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	pthread_barrier_destroy(&barrier);
-	//pthread_barrier_destroy(&barrier1);
-	//pthread_barrier_destroy(&barrier2);
 	
-	//free_memory(result_julia, height_julia);
-	//free_memory(result_man, height_man);
 
 	pthread_exit(NULL);
 	
