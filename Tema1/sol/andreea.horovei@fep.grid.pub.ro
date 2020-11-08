@@ -101,7 +101,7 @@ void write_output_file(char *out_filename, int **result, int width, int height)
 	fprintf(file, "P2\n%d %d\n255\n", width, height);
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
-			fprintf(file, "%d ", result[i][j]);
+			fprintf(file, "%d ", result[height - i - 1][j]);
 		}
 		fprintf(file, "\n");
 	}
@@ -144,9 +144,8 @@ void free_memory(int **result, int height)
 }
 
 void *f(void *arg) {
-	long id = *(long *)arg; //id thread
+	long id = *(long *)arg;
 	int i;
-	//indicii de start si end care indica coloanele matricelor care vor fi prelucrate
 	int start_man = id * (double) width_man / P;
 	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
 
@@ -169,11 +168,12 @@ void *f(void *arg) {
 			exit(1);
 		}
 	}
-	//inainte de a trece mai departe, trebuie sa se finalizeze alocarile
+	//inainte de a trece mai departe, trebuie sa se termine alocarile
 	pthread_barrier_wait(&barrier);
 
 	for (w = start_julia; w < end_julia; w++) {
 		for (h = 0; h < height_julia; h++) {
+			
 			int step = 0;
 			//z - punctul din planul complex in are definim multimea
 			complex z = { .a = w * par_julia.resolution + par_julia.x_min,
@@ -186,57 +186,71 @@ void *f(void *arg) {
 				z.b = 2 * z_aux.a * z_aux.b + par_julia.c_julia.b;
 				step++;
 			}
-			result_julia[height_julia - h - 1][w] = step % 256;
+			result_julia[h][w] = step % 256;
+			
 		}
 	}
 
 	pthread_barrier_wait(&barrier);
-	if (id == 0) { //un singur thread se ocupa de scrierea rezultatului
-		//la afisare rezultatele sunt printate direct in coordonate ecran
+	if (id == 0) {
 		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
 	}
-	
+	pthread_barrier_wait(&barrier);
+
 	for (w = start_man; w < end_man; w++) {
 		for (h = 0; h < height_man; h++) {
+			
 			complex c = { .a = w * par_man.resolution + par_man.x_min,
 							.b = h * par_man.resolution + par_man.y_min };
-			complex z = { .a = 0.0, .b = 0.0 };
+			complex z = { .a = 0, .b = 0 };
 			int step = 0;
-			/*
+
 			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
-				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
+
+				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0)+ c.a;
 				z.b = 2.0 * z_aux.a * z_aux.b + c.b;
-				step++;
-			}*/
-			while (sqrt(z.a * z.a * 1.0 + z.b * z.b * 1.0) < 2.0 && step < par_man.iterations) {
+
+				
+			/*while (sqrt(z.a * z.a + z.b * z.b) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
-				//printf("z_aux: %f, %f\n", z_aux.a, z_aux.b);
-				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
-				z.b = 2* z_aux.a * z_aux.b + c.b;
-				//printf("z: %f, %f\n", z.a, z.b);
+
+				z.a = z_aux.a * z_aux.a - z_aux.b * z_aux.b + c.a;
+				z.b = 2.0 * z_aux.a * z_aux.b + c.b;*/
 				step++;
+				
 			}
-			result_man[height_man - h - 1][w] = step % 256; 
+			result_man[h][w] = step % 256;
+			
 		}
 	}
 
-	//inainte de scrierea rezultatului in fisier, toate threadurile trebuie sa finalizeze calculele
+	//bariera
 	pthread_barrier_wait(&barrier);
+	// transforma rezultatul din coordonate matematice in coordonate ecran (logice)
 	if (id == 0) {
 		write_output_file(out_filename_mandelbrot, result_man, width_man, height_man);
 	}
+	pthread_barrier_wait(&barrier);
 
 	pthread_exit(NULL);
 }
 
 
+
 int main(int argc, char *argv[])
 {
+	
+	// se citesc argumentele programului
 	get_args(argc, argv);
 	long arguments[P];
 	pthread_t threads[P];
-	
+	// Julia:
+	// - se citesc parametrii de intrare
+	// - se aloca tabloul cu rezultatul
+	// - se ruleaza algoritmul
+	// - se scrie rezultatul in fisierul de iesire
+	// - se elibereaza memoria alocata
 	read_input_file(in_filename_julia, &par_julia);
 	read_input_file(in_filename_mandelbrot, &par_man);
 
@@ -248,12 +262,18 @@ int main(int argc, char *argv[])
 
 	result_julia = (int **)malloc(height_julia * sizeof(int *));
 	result_man = (int **)malloc(height_man * sizeof(int *));
+	//result_julia = allocate_memory(width_julia, height_julia);
+	//result_man = allocate_memory(width_man, height_man);
 
 	pthread_barrier_init(&barrier, NULL, P);
+	pthread_barrier_init(&barrier1, NULL, P);
+	pthread_barrier_init(&barrier2, NULL, P);
+
+
 	
 	long i;
 	for (i = 0; i < P; i++) {
-		arguments[i] = i; //argumentul trimis este indicele asociat thread-ului
+		arguments[i] = i;
 		int r = pthread_create(&threads[i], NULL, f, (void *)&arguments[i]);
 		if (r != 0) {
 			printf("Eroare la crearea unui thread!\n");
@@ -268,8 +288,11 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-
 	pthread_barrier_destroy(&barrier);
+	pthread_barrier_destroy(&barrier1);
+	pthread_barrier_destroy(&barrier2);
+	
+
 	pthread_exit(NULL);
 	
 	return 0;
