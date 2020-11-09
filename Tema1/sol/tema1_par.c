@@ -18,18 +18,9 @@ int P; //numarul de thread-uri
 int **result_julia;
 int width_julia, height_julia;
 pthread_barrier_t barrier;
-pthread_barrier_t barrier1;
-pthread_barrier_t barrier2;
-pthread_barrier_t barrier3;
-pthread_barrier_t barrier4;
-pthread_mutex_t mutex1;
-pthread_mutex_t mutex2;
-
 
 int **result_man;
 int width_man, height_man;
-pthread_barrier_t barrier;
-pthread_mutex_t mutex1, mutex2;
 
 // structura pentru un numar complex
 typedef struct _complex {
@@ -145,7 +136,6 @@ void free_memory(int **result, int height)
 
 void *f(void *arg) {
 	long id = *(long *)arg; //id thread
-	int i;
 	//indicii de start si end care indica coloanele matricelor care vor fi prelucrate
 	int start_man = id * (double) width_man / P;
 	int end_man = MIN ((id + 1) * (double) width_man / P, width_man);
@@ -154,24 +144,7 @@ void *f(void *arg) {
 	int end_julia = MIN ((id + 1) * (double) width_julia / P, width_julia);
 	int w, h;
 
-	for (i = start_julia; i < height_julia; i++) {
-		result_julia[i] = malloc(width_julia * sizeof(int));
-		if (result_julia[i] == NULL) {
-			printf("Eroare la malloc!\n");
-			exit(1);
-		}
-	}
-
-	for (i = start_man; i < height_man; i++) {
-		result_man[i] = malloc(width_man * sizeof(int));
-		if (result_man[i] == NULL) {
-			printf("Eroare la malloc!\n");
-			exit(1);
-		}
-	}
-	//inainte de a trece mai departe, trebuie sa se finalizeze alocarile
-	pthread_barrier_wait(&barrier);
-
+	//calculul multimii Julia
 	for (w = start_julia; w < end_julia; w++) {
 		for (h = 0; h < height_julia; h++) {
 			int step = 0;
@@ -186,41 +159,35 @@ void *f(void *arg) {
 				z.b = 2 * z_aux.a * z_aux.b + par_julia.c_julia.b;
 				step++;
 			}
+			//memoreaza rezultatul direct in coordonate ecran
 			result_julia[height_julia - h - 1][w] = step % 256;
 		}
 	}
 
 	pthread_barrier_wait(&barrier);
 	if (id == 0) { //un singur thread se ocupa de scrierea rezultatului
-		//la afisare rezultatele sunt printate direct in coordonate ecran
+		//rezultatele sunt printate direct in coordonate ecran
 		write_output_file(out_filename_julia, result_julia, width_julia, height_julia);
 	}
 	
+	//calculul multimii Mandelbrot
 	for (w = start_man; w < end_man; w++) {
 		for (h = 0; h < height_man; h++) {
 			complex c = { .a = w * par_man.resolution + par_man.x_min,
 							.b = h * par_man.resolution + par_man.y_min };
 			complex z = { .a = 0.0, .b = 0.0 };
 			int step = 0;
-			/*
+			
 			while (sqrt(pow(z.a, 2.0) + pow(z.b, 2.0)) < 2.0 && step < par_man.iterations) {
 				complex z_aux = { .a = z.a, .b = z.b };
 				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
 				z.b = 2.0 * z_aux.a * z_aux.b + c.b;
 				step++;
-			}*/
-			while (sqrt(z.a * z.a * 1.0 + z.b * z.b * 1.0) < 2.0 && step < par_man.iterations) {
-				complex z_aux = { .a = z.a, .b = z.b };
-				//printf("z_aux: %f, %f\n", z_aux.a, z_aux.b);
-				z.a = pow(z_aux.a, 2.0) - pow(z_aux.b, 2.0) + c.a;
-				z.b = 2* z_aux.a * z_aux.b + c.b;
-				//printf("z: %f, %f\n", z.a, z.b);
-				step++;
 			}
+			//memoreaza rezultatul direct in coordonate ecran
 			result_man[height_man - h - 1][w] = step % 256; 
 		}
 	}
-
 	//inainte de scrierea rezultatului in fisier, toate threadurile trebuie sa finalizeze calculele
 	pthread_barrier_wait(&barrier);
 	if (id == 0) {
@@ -246,8 +213,8 @@ int main(int argc, char *argv[])
 	width_man = (par_man.x_max - par_man.x_min) / par_man.resolution;
 	height_man = (par_man.y_max - par_man.y_min) / par_man.resolution;
 
-	result_julia = (int **)malloc(height_julia * sizeof(int *));
-	result_man = (int **)malloc(height_man * sizeof(int *));
+	result_julia = allocate_memory(width_julia, height_julia);
+	result_man = allocate_memory(width_man, height_man);
 
 	pthread_barrier_init(&barrier, NULL, P);
 	
