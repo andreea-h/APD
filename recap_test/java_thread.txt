@@ -1,0 +1,56 @@
+//crearea unei clase care implementeaza interfata Runnable
+
+public class Task implements Runnable {
+	public void run() {
+		System.out.println("Hello from my new thread!");
+	}
+}
+//se va crea o instanta a clasei Task care va fi data ca parametru 
+constructorului clasei Thread
+public class Main {
+	public static void main(String[] args) {
+		Thread t = new Thread(new Task());
+		t.start();
+	}
+}
+
+
+
+
+//crearea unei clase care extinde clasa Thread 
+si suprascrie metoda "void run()"
+
+pubic class MyThread extends Thread {
+	public void run() {
+		System.out.prinltn("Hello from my new thread!");
+	}
+}
+//se va instantia clasa MyThread
+public class Main {
+	public static void main(String[] args) {
+		MyThread t = new MyThread();
+		t.start();
+	}
+}
+
+import java.lang.InterruptedException;
+import java.util.concurrent.BrokenBarrierException;
+
+
+CyclicBarrier barrier = new CyclicBarrier(5);
+
+try {
+		barrier.await();
+	} catch (InterruptedException | BrokenBarrierException e) {
+		e.printStackTrace();
+}
+
+//orice obiect java are in interior un monitor pentru care pot sa il folosesc pentru sincronizare
+
+//bariera clasica nu poate fi folosita in interiorul loop-urilor
+
+
+
+import java.lang.InterruptedException; //pe bariere
+
+import java.util.concurrent.Semaphore; //pt semafoare
