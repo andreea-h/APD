@@ -1,0 +1,33 @@
+package oneProducerOneConsumer;
+/**
+ * @author cristian.chilipirea
+ *
+ */
+import java.util.concurrent.Semaphore;
+
+public class Buffer {
+	int a;
+	Semaphore plin = new Semaphore(0);
+	Semaphore gol = new Semaphore(1);
+	
+	void put(int value) {
+		try {
+			gol.acquire();
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		a = value;
+		plin.release(); //perminte unui consumator sa ia o valoare
+	}
+
+	int get() {
+		try {
+			plin.acquire();
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		int rez = a;
+	}
+}

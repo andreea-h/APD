@@ -1,0 +1,12 @@
+
+public class Inc {
+	static int a = 2;
+	
+	public static synchronized void increment() {
+		//daca metoda este statica monitorul lock-ul este pus pe intreaga clasa Inc
+		
+			a++;
+			System.out.println("a fost calculat a = " + a);
+		
+	}
+}

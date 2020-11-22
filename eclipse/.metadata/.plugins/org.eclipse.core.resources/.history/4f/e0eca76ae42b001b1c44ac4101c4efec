@@ -1,0 +1,24 @@
+package shortestPathsFloyd_Warshall;
+
+public class MyThread extends Thread {
+	
+	private int id;
+	
+	public MyThread(int id) {
+		this.id = id;
+	}
+	
+	public void run() {
+		for (int k = 0; k < 5; k++) {
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 5; j++) {
+					Main.graph1[i][j] = Math.min(Main.graph1[i][k] + Main.graph1[k][j], Main.graph1[i][j]);
+				}
+			}
+		}
+		
+		
+		
+	}
+
+}

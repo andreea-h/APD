@@ -1,0 +1,41 @@
+package customer_producer_wait_notify;
+
+/**
+ * @author cristian.chilipirea
+ *
+ */
+import java.util.concurrent.Semaphore;
+
+public class Buffer {
+	int a;
+	Object object;
+	
+	public Buffer() {
+		object = new Object();
+	}
+	
+	void put(int value) {
+		synchronized(object) {
+			a = value;
+			System.out.println("cedeaza monitorul lui object");
+			object.notify();
+		}
+		
+	}
+
+	int get() {
+		int rez = 0;
+		synchronized(object) {
+			try {
+				System.out.println("Asteapta monitorul lui object");
+				object.wait();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Am primit monitorul in get");
+			rez = a;
+		}
+		return rez;
+	}
+}

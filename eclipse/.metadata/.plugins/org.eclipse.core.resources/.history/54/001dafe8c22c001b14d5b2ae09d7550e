@@ -1,0 +1,16 @@
+package multipleProducersMultipleConsumers;
+
+import java.util.concurrent.ArrayBlockingQueue;
+
+public class Buffer {
+	ArrayBlockingQueue q;
+	
+	
+	void put(int value) {
+		this.value = value;
+	}
+
+	int get() {
+		return value;
+	}
+}

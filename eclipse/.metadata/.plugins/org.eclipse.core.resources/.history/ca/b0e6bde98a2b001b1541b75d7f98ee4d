@@ -1,0 +1,9 @@
+
+public class Inc {
+	int a = 2;
+	
+	public void increment() {
+		System.out.println("")
+		a++;
+	}
+}

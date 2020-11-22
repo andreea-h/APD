@@ -1,0 +1,92 @@
+
+import java.util.*;
+import java.io.*;
+import java.lang.InterruptedException;
+import java.util.concurrent.BrokenBarrierException;
+
+class Sender {
+	//print a message
+	public void send(String msg) {
+		
+		synchronized(this) //un thread preia monitorul asociat acestui bloc
+		{
+			System.out.println("Sending " + msg);
+			
+			try {
+				Thread.sleep(1000);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			};
+			
+			System.out.println("\n" + msg + " sent");
+		}
+		
+	}
+}
+
+//send message using threads
+class ThreadedSender extends Thread {
+	
+	private String message;
+	Sender obj;
+	
+	ThreadedSender(String message, Sender obj) {
+		this.message = message;
+		this.obj = obj;
+	}
+	
+	public void run() {
+		// daca nu fac sincronizare pe instanta clasei Sender, obj, 
+		// mai multe threaduri pot sa inceapa executia simultana a lui send si nu se mai executa si afisraea "message send"
+		//synchronized(obj) //fac sincronizare direct pe metoda send din clasa Sender
+		{
+			obj.send(message);
+		}
+	}
+}
+
+
+class Main {
+	private static int NR_THREADS = 8;
+	
+	public static void main(String[] args) {
+		ThreadedSender[] t = new ThreadedSender[NR_THREADS];
+		Sender obj = new Sender();
+		int i;
+		for (i = 0; i < NR_THREADS; i++) {
+			
+			t[i] = new ThreadedSender("mesaj" + i, obj);
+			t[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			try {
+				t[i].join();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

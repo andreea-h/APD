@@ -1,0 +1,12 @@
+
+public class Main {
+
+	
+	public static void main(String[] args) {
+		int NR_THREADS = Runtime.getRuntime().availableProcessors();
+		int i;
+		Thread[] threads = new Thread[NR_THREADS];
+
+	}
+
+}

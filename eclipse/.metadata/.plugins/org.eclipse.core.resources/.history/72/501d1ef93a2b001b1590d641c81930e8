@@ -1,0 +1,75 @@
+
+import java.util.*;
+import java.io.*;
+		
+
+class Sender {
+	//print a message
+	public void send(String msg) {
+		
+		System.out.println("Sending " + msg);
+	
+		try {
+			Thread.sleep(1000);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		};
+		
+		System.out.println("\n" + msg + " sent");
+	}
+}
+
+//send message using threads
+class ThreadedSender extends Thread {
+	
+	private String message;
+	Sender obj;
+	
+	ThreadedSender(String message, Sender obj) {
+		this.message = message;
+		this.obj = obj;
+	}
+	
+	public void run() {
+		obj.send(message);
+	}
+}
+
+
+class Main {
+	private static int NR_THREADS = 8;
+	
+	public static void main(String[] args) {
+		ThreadedSender[] t = new ThreadedSender[NR_THREADS];
+		
+		int i;
+		for (i = 0; i < NR_THREADS; i++) {
+			Sender obj = new Sender();
+			t[i] = new ThreadedSender("mesaj" + i, obj);
+			t[i].start();
+			
+		
+		}
+		
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+package customer_producer_wait_notify;
+
+/**
+ * @author cristian.chilipirea
+ *
+ */
+import java.util.concurrent.Semaphore;
+
+public class Buffer {
+	int a;
+	Object object;
+	
+	public Buffer() {
+		object = new Object();
+	}
+	
+	void put(int value) {
+		synchronized(object) {
+			object.notify();
+			a = value;
+		}
+		
+	}
+
+	int get() {
+		int rez = 0;
+		synchronized(object) {
+			object.wait();
+			rez = a;
+		}
+		return rez;
+	}
+}

@@ -1,0 +1,31 @@
+
+import java.lang.InterruptedException;
+
+public class Main {
+
+	
+	public static void main(String[] args) {
+		int NR_THREADS = 2;
+		int i;
+		Thread[] threads = new Task[NR_THREADS];
+		
+		//unul din threaduri modifica o valoare
+		//celalalt thread asteapta modificarea acelei valori
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			threads[i] = new Task(i);
+			threads[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			try {
+				threads[i].join();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+}

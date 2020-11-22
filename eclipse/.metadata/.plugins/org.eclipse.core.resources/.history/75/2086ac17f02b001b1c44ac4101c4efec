@@ -1,0 +1,20 @@
+
+public class Task extends Thread {
+	private int id;
+	
+	public Task(int id) {
+		this.id = id;
+	}
+	
+	public void run() {
+		if (id == 0) {
+			System.out.println("Hello dint thread-ul 0");
+			
+			Main.a = 2;
+		}
+		else {
+			System.out.println("Valoarea lui a este " + Main.a);
+		}
+	}
+}
+

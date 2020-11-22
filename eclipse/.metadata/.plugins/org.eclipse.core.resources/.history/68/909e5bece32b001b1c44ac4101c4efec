@@ -1,0 +1,9 @@
+package shortestPathsFloyd_Warshall;
+
+public class MyThread extends Thread {
+	
+	public MyThread(int id) {
+		this.id = id;
+	}
+	
+}

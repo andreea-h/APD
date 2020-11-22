@@ -1,0 +1,28 @@
+
+//vector de dimeniune fixa thread-safe
+public class MyConcurrentArray<T> {
+	
+	private static int nrInstances = 0;
+	private T[] content;
+	
+	public MyConcurrentArray(int size) {
+		if (size > 0) {
+			content = new T[size];
+		}
+		else {
+			throw new RuntimeException("Negative size provided for MyConcurrentArray instantiation.");
+		}
+		
+		synchronized(MyConcurrentArray.class) {
+			nrInstances++;
+		}
+	}
+	
+	 public synchronized T get(int index) {
+	        if (index < content.length) {
+	            return content[index];
+	        }
+	        throw new IndexOutOfBoundsException(index + " is out of bounds for MyConcurrentArray of size " + content.length);
+	    }
+	
+}

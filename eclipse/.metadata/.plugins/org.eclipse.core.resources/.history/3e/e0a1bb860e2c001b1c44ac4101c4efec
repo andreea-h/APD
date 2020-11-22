@@ -1,0 +1,45 @@
+package customer_producer_wait_notify;
+
+/**
+ * @author cristian.chilipirea
+ *
+ */
+import java.util.concurrent.Semaphore;
+import java.util.*;
+
+public class Buffer {
+	Queue<Integer> q;
+	Object object;
+	
+	public Buffer() {
+		object = new Object(); 
+		q = (Queue<Integer>) new ArrayList<Integer>(10);
+	}
+	
+	void put(int value) { //producatorul trece in waiting daca bufferul este plin
+		synchronized(object) {
+			while(q.size() == 10) { //daca buffer-ul este plin, producerul asteapta ca un consumator sa faca get
+				object.wait();
+			}
+			System.out.println("cedeaza monitorul lui object");
+			object.notify();
+		}
+		
+	}
+
+	int get() {
+		int rez = 0;
+		synchronized(object) {
+			try {
+				System.out.println("Asteapta monitorul lui object");
+				object.wait();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Am primit monitorul in get");
+			rez = a;
+		}
+		return rez;
+	}
+}

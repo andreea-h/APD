@@ -1,0 +1,30 @@
+
+import java.util.*;
+import java.io.*;
+		
+
+class Sender {
+	//print a message
+	public void send(String msg) {
+		
+		System.out.println("Sending " + msg);
+	
+		try {
+			Thread.sleep(1000);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		};
+		
+		System.out.println("\n" + msg + " sent");
+	}
+}
+
+//send message using threads
+class ThreadedSender {
+	
+	private String message;
+	
+	
+	
+}

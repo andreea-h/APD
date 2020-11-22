@@ -1,0 +1,21 @@
+package oneProducerOneConsumer;
+/**
+ * @author cristian.chilipirea
+ *
+ */
+import java.util.concurrent.Semaphore;
+
+public class Buffer {
+	int a;
+	Semaphore plin = new Semaphore(0);
+	Semaphore gol = new Semaphore(1);
+	
+	void put(int value) {
+		gol.acqui
+		a = value;
+	}
+
+	int get() {
+		return a;
+	}
+}

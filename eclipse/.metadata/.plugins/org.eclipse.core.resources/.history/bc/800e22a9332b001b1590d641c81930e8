@@ -1,0 +1,5 @@
+
+//vector de dimeniune fixa thread-safe
+public class MyConcurrentArray<T> {
+
+}

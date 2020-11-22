@@ -1,0 +1,27 @@
+
+public class Task extends Thread {
+	
+	private int id;
+	private int result;
+	
+	public Task(int id) {
+		this.id = id;
+	}
+	
+	public void run() {
+		//result = id * id;
+		increment();
+	}
+	
+	public int getResult() {
+		return result;
+	}
+	
+	public void increment() {
+		synchronized(Task.class) { //trebuie sa fac synchronized pe acelasi monitor //pe obj. lock sau pe Task.class
+			System.out.println("Valoarea lui a este " + Main.a + " in thread-ul " + id);
+			Main.a++;
+			System.out.println("a a devenit " + Main.a + " in thread-ul " + id);
+		}
+	}
+}

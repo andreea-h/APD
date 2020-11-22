@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="/home/andreea/Desktop/An3/APD/recap_test/lab6/src"/>
+			<item value="/home/andreea/Desktop/An3/APD/lab5"/>
+			<item value="/home/andreea/Desktop/An3/APD/recap_test/lab5/lab05_skel (3)"/>
+			<item value="/home/andreea/Desktop/An3/APD/recap_test/lab4/lab_04_skel/skel"/>
+		</list>
+	</section>
+	<section name="NewWizardAction">
+	</section>
+</section>

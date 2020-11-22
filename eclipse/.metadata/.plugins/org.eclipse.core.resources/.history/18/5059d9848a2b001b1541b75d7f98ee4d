@@ -1,0 +1,8 @@
+
+public class Inc {
+	int a = 2;
+	
+	public void synchronized() {
+	
+	}
+}

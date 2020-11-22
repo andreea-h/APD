@@ -1,0 +1,14 @@
+
+//vector de dimeniune fixa thread-safe
+public class MyConcurrentArray<T> {
+	
+	private static int nrInstances = 0;
+	private T[] content;
+	
+	public MyConcurrentArray(int size) {
+		if (size > 0) {
+			content = new T[size];
+		}
+	}
+	
+}

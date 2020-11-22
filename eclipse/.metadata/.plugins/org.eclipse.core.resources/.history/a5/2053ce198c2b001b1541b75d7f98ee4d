@@ -1,0 +1,12 @@
+
+public class Inc {
+	static int a = 2;
+	
+	public synchronized void increment() {
+		//se foloseste monitor lock-ul instantei din clasa Inc pe care apelez increment
+		//intotdeauna apelez incmrement pe aceeasi instanta a clasei Inc, cea din Main
+			a++;
+			System.out.println("a fost calculat a = " + a);
+		
+	}
+}

@@ -1,0 +1,21 @@
+package bug2;
+/**
+ * @author cristian.chilipirea
+ * 
+ *         Why does this code not block? We took the same lock twice!
+ */
+public class MyThread implements Runnable {
+	static int i;
+
+	@Override
+	public void run() {
+		synchronized (this) { //pune monitor lock-ul pe instanta clasei MyThread pe care apelez functia run()
+			//adica pe obiectul thread din Main
+			//synchronized (this) 
+			{
+				i++;
+				System.out.println(i);
+			}
+		}
+	}
+}

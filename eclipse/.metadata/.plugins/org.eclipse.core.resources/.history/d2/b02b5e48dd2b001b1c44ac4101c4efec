@@ -1,0 +1,21 @@
+
+public class Main {
+
+	
+	public static void main(String[] args) {
+		int NR_THREADS = Runtime.getRuntime().availableProcessors();
+		int i;
+		Thread[] threads = new Task[NR_THREADS];
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			threads[i] = new Task(i);
+			threads[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			
+		}
+		
+	}
+
+}

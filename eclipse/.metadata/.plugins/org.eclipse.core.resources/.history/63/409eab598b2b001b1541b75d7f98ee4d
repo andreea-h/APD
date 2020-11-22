@@ -1,0 +1,11 @@
+
+public class Inc {
+	static int a = 2;
+	
+	public void increment() {
+		synchronized(Main.lock) {
+			a++;
+			System.out.println("a fost calculat a = " + a);
+		}
+	}
+}

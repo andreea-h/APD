@@ -1,0 +1,19 @@
+
+public class Inc {
+	static int a = 2;
+	
+	public static synchronized void increment() {
+		//daca metoda este statica monitorul lock-ul este pus pe intreaga clasa Inc (locking la nivel de clasa)
+		//pot sa apelez inc.increment() pe obiecte inc de instante diferite si vi avea tot un singur thead care face increment la un moment dat
+			a++;
+			System.out.println("a fost calculat a = " + a);
+		
+	}
+	
+	//echivalent cu:
+	public static void increment() {
+		synchronized(Inc.class) {
+			a++;
+		}
+	}
+}

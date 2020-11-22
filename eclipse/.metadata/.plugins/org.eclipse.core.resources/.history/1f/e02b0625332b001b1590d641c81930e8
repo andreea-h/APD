@@ -1,0 +1,34 @@
+
+import java.lang.InterruptedException;
+
+public class Main {
+
+	public static int NR_THREADS = 4;
+	
+	public static void main(String[] args) {
+		//Task[] threads = new Task[NR_THREADS];
+		//sau 
+		Thread[] threads = new Thread[NR_THREADS];
+		
+		int i;
+		for (i = 0; i < NR_THREADS; i++) {
+			threads[i] = new Task(i);
+			
+			threads[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			try {
+				threads[i].join();
+				System.out.println("Thread-ul a intors rezultatul " + threads[i].getResult());
+				
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	
+	}
+
+}
