@@ -1,0 +1,23 @@
+
+import java.util.Random;
+
+public class Task extends Thread {
+	private int id;
+	
+	
+	
+	public Task(int id) {
+		this.id = id;
+	}
+	
+	public void run() {
+		int start = id * (int) Math.ceil((double) Main.N / Main.NR_THREADS);
+		int end = Math.min(Main.N, (id + 1) * (int) Math.ceil((double) Main.N / Main.NR_THREADS));
+		
+		//genereaza aleator un numar k din [2, 10]
+		 Random rand;
+
+		 int k = rand.nextInt((max - min) + 1) + min;
+	}
+}
+

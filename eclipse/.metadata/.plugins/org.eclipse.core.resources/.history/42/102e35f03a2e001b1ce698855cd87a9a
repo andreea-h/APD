@@ -1,0 +1,82 @@
+package multipleProducersMultipleConsumersNBuffer;
+
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Semaphore;
+
+/**
+ * @author Gabriel Gutu <gabriel.gutu at upb.ro>
+ *
+ */
+public class Buffer {
+    /*
+	ArrayBlockingQueue queue;
+    
+    public Buffer(int size) {
+        queue = new ArrayBlockingQueue(size);
+    }
+
+	void put(int value) {
+		try {
+			queue.put(value); 
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+               
+	}
+
+	int get() {
+		int rez = 0;
+		try {
+			rez = (int)queue.take();
+		}
+        catch(InterruptedException e) {
+        	e.printStackTrace();
+        }
+        return rez;
+	}
+	
+	*/
+	
+	Queue queue;
+	Semaphore plin;
+	Semaphore gol;
+    
+    public Buffer(int size) {
+        queue = new LimitedQueue(size);
+        plin = new Semaphore(size);
+        gol = new Semaphore(0);
+    }
+
+	void put(int value) {
+		try {
+			plin.acquire();
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println(value);
+		queue.add(value); 
+		gol.release();
+	}
+
+	int get() {
+		try {
+			gol.acquire();
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		int rez = 0;
+		rez = (int)queue.remove();
+		plin.release();
+		return rez;
+	}
+}
+
+
+
+
+
+

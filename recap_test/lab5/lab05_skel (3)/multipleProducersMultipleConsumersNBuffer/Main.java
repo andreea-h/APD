@@ -17,11 +17,13 @@ public class Main {
 		Buffer buffer = new Buffer(BUFFER_SIZE);
         
 		Thread threads[] = new Thread[N_CONSUMERS + N_PRODUCERS];
+		//creeaza threadurile producator
 		for (int i = 0; i < N_PRODUCERS; i++)
 			threads[i] = new Thread(new Producer(buffer, i));
+		//creeaza threadurile consumator
 		for (int i = N_PRODUCERS; i < N_CONSUMERS + N_PRODUCERS; i++)
 			threads[i] = new Thread(new Consumer(buffer, i - N_PRODUCERS));
-
+		//porneste toate threadurile
 		for (int i = 0; i < N_CONSUMERS + N_PRODUCERS; i++)
 			threads[i].start();
 		for (int i = 0; i < N_CONSUMERS + N_PRODUCERS; i++) {

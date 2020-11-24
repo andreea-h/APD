@@ -1,0 +1,43 @@
+
+import java.util.Random;
+
+public class Task extends Thread {
+	private int id;
+	
+	
+	
+	public Task(int id) {
+		this.id = id;
+	}
+	
+	public void run() {
+		int start = id * (int) Math.ceil((double) Main.N / Main.NR_THREADS);
+		int end = Math.min(Main.N, (id + 1) * (int) Math.ceil((double) Main.N / Main.NR_THREADS));
+		
+		int j;
+		
+		//genereaza aleator un numar k din [2, 10]
+		 Random rand = new Random();
+
+		 int k = rand.nextInt(9) + 2;
+		 //System.out.println("De generat " + k + " perechi");
+		 for (j = 0; j < k; j++) {
+			 //genereaza o pereche (k, v)
+			 int i = rand.nextInt(8) + 2;
+			 int v = rand.nextInt(8) + 2;
+			 System.out.println("[Thread " + id +"] Am generat perechea (" + i + "," + v + ")");
+			 //citeste valoarea maxima anterioara pentru intrarea i
+			 int old_value = Main.map.get(i);
+			 try {
+				 sleep(1);
+			 }
+			 catch(InterruptedException e) {
+				 e.printStackTrace():
+			 }
+			 
+		 }
+		 
+		 
+	}
+}
+

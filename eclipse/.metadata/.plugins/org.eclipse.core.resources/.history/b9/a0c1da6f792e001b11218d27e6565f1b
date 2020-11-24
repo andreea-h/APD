@@ -1,0 +1,29 @@
+
+import java.lang.InterruptedException;
+
+public class Main {
+
+	public static int N = 100;
+	public static int NR_THREADS = 8;
+	
+	public static void main(String[] args) {
+		int i;
+		Thread[] threads = new Task[NR_THREADS];
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			threads[i] = new Task(i);
+			threads[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			try {
+				threads[i].join();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+}

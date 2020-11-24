@@ -1,0 +1,34 @@
+package multipleProducersMultipleConsumersNBuffer;
+
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+
+
+/**
+ * @author Gabriel Gutu <gabriel.gutu at upb.ro>
+ *
+ */
+public class Buffer {
+    
+   // Queue queue;
+	
+	ArrayBlockingQueue queue;
+    
+    public Buffer(int size) {
+        queue = new ArrayBlockingQueue(size);
+    }
+
+	void put(int value) {
+		try {
+			queue.put(value); 
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+               
+	}
+
+	int get() {
+        return (int)queue.poll();
+	}
+}

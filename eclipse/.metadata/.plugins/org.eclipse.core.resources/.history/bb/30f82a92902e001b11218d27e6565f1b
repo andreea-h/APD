@@ -1,0 +1,38 @@
+
+
+import java.util.HashMap;
+import java.lang.InterruptedException;
+
+public class Main {
+
+	public static HashMap<Integer, Integer> map;
+	
+	
+	public static int NR_THREADS = 8;
+
+	public static void main(String[] args) {
+		int i;
+		Thread[] threads = new Task[NR_THREADS];
+		
+		map = new HashMap<Integer, Integer>(10);
+		for (i = 1; i <= 10; i++) {
+			
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			threads[i] = new Task(i);
+			threads[i].start();
+		}
+		
+		for (i = 0; i < NR_THREADS; i++) {
+			try {
+				threads[i].join();
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+}
