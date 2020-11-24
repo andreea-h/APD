@@ -1,0 +1,8 @@
+C - pthreads - aici nu e nevoie de ceil()
+
+int start = id * (double)N / P;
+int end = min((id + 1) * (double)N / P, N); // trebuie definită o funcție min de către voi
+Java - aici trebuie folosit cu Math.ceil, nu o să meargă 100% corect ca în C
+
+int start = id * (int) Math.ceil((double) size / noThreads);
+int end = Math.min(size, (id + 1) * (int) Math.ceil((double) size / noThreads));
