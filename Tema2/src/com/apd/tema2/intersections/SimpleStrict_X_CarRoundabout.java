@@ -19,7 +19,9 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
     CyclicBarrier barrier1;
     Semaphore exitSempahore;
     Object obj = new Object();
+    Object obj1 = new Object();
     AtomicInteger nrCars = new AtomicInteger(0);
+    AtomicInteger nrCars1 = new AtomicInteger(0);
 
     public void action(Car car) {
         /**inainte de a trece mai departe trebuie ca toate masinile sa faca reached**/
@@ -30,19 +32,13 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
         catch(InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-        /*
-        try {
-            exitSempahore.acquire(x * noDirections);
-        }
-        catch(InterruptedException e) {
-            e.printStackTrace();
-        }
-        */
+
         /**inainte de a face selectia unei masini trebuie ca toate masinile din runda precedenta sa fie iesite din intersectie**/
+
         try {
             semaphores[car.getStartDirection()].acquire();
             synchronized (obj) {
-                // System.out.println("asteptare nr masini: " + nrCars.get());
+
                 //while (nrCars.get() != x * noDirections && nrCars.get() != 0)
                 if (nrCars.get() != 0) {
                     obj.wait();
@@ -63,18 +59,17 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
             e.printStackTrace();
         }
 
+
         synchronized (obj) {
             System.out.println("Car " + car.getId() + " has exited the roundabout after " + (int)T/1000 + " seconds");
             /**inainte de a trece mai departe trebuie ca toate masinile sa paraseasca sensul giratoriu**/
 
             /**permite unei alte masini orientata pe aceeasi directie sa intre in intersectie**/
             semaphores[car.getStartDirection()].release();
-
             nrCars.getAndAdd(1);
             //System.out.println("Nr de masini detectat dupa ce a iesit masina " + car.getId() + " este " + nrCars);
             if (nrCars.get() == x * noDirections) {
-               // System.out.println("Nr de masini detectat dupa ce a iesit masina " + car.getId() + " este " + nrCars);
-                obj.notify();
+                obj.notifyAll();
                 nrCars.set(0);
             }
         }
