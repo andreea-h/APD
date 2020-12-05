@@ -92,6 +92,9 @@ public class IntersectionHandlerFactory {
                     } // NU MODIFICATI
 
                     // Continuati de aici
+                    if (Main.intersection instanceof PriorityIntersection) {
+                        Main.intersection.action(car);
+                    }
                 }
             };
             case "crosswalk" -> new IntersectionHandler() {
