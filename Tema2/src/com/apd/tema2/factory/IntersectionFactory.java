@@ -19,6 +19,8 @@ public class IntersectionFactory {
          cache.put("simple_strict_x_car_roundabout", new SimpleStrict_X_CarRoundabout());
          cache.put("simple_max_x_car_roundabout", new SimpleMax_X_CarRoundabout());
          cache.put("priority_intersection", new PriorityIntersection());
+         cache.put("crosswalk", new CrossWalk());
+         cache.put("simple_maintenance", new SimpleMaintenance());
     }
 
     public static Intersection getIntersection(String handlerType) {

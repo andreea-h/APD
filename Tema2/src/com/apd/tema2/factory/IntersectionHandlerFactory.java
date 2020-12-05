@@ -84,7 +84,6 @@ public class IntersectionHandlerFactory {
                 @Override
                 public void handle(Car car) {
                     // Get your Intersection instance
-
                     try {
                         sleep(car.getWaitingTime());
                     } catch (InterruptedException e) {
@@ -100,13 +99,17 @@ public class IntersectionHandlerFactory {
             case "crosswalk" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    
+                    if (Main.intersection instanceof CrossWalk) {
+                        Main.intersection.action(car);
+                    }
                 }
             };
             case "simple_maintenance" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    
+                    if (Main.intersection instanceof SimpleMaintenance) {
+                        Main.intersection.action(car);
+                    }
                 }
             };
             case "complex_maintenance" -> new IntersectionHandler() {

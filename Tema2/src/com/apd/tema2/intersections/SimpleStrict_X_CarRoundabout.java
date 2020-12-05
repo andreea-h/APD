@@ -17,6 +17,7 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
 
     Semaphore[] semaphores; /**tine controlul asupra numarului de masini care pot intra in intersectie din fiecare directie**/
     CyclicBarrier barrier;
+    CyclicBarrier barrier1;
     Object obj = new Object();
     AtomicInteger nrCars = new AtomicInteger(0);
 
@@ -30,6 +31,7 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
             e.printStackTrace();
         }
 
+
         /**inainte de a face selectia unei masini trebuie ca toate masinile din runda precedenta sa fie iesite din intersectie**/
         try {
             semaphores[car.getStartDirection()].acquire();
@@ -41,6 +43,14 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
             System.out.println("Car " + car.getId() + " was selected to enter the roundabout from lane " + car.getStartDirection());
         }
         catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        /**pentru a intra in intersectie, fiecare masina asteapta sa primeasca accesul in intersectie cate o masina pe fiecare directie**/
+        try {
+            barrier1.await();
+        }
+        catch(InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
 
@@ -75,6 +85,7 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
             semaphores[i] = new Semaphore(x);
         }
         barrier = new CyclicBarrier(Main.carsNo);
+        barrier1 = new CyclicBarrier(noDirections * x);
     }
 
     public void setTime(int T) {

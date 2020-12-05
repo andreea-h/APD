@@ -92,13 +92,20 @@ public class ReaderHandlerFactory {
             case "crosswalk" -> new ReaderHandler() {
                 @Override
                 public void handle(final String handlerType, final BufferedReader br) throws IOException {
-                    
+                    Main.intersection = IntersectionFactory.getIntersection("crosswalk");
+                    String[] line = br.readLine().split(" ");
+                    int time = Integer.parseInt(line[0]); /**timpul cat inca vin pietoni**/
+                    int nrPedestrians = Integer.parseInt(line[1]); /**numarul de pietoni de la care trebuie sa se permita trecerea**/
+                    Main.pedestrians = new Pedestrians(time, nrPedestrians);
                 }
             };
             case "simple_maintenance" -> new ReaderHandler() {
                 @Override
                 public void handle(final String handlerType, final BufferedReader br) throws IOException {
-                    
+                    Main.intersection = IntersectionFactory.getIntersection("simple_maintenance");
+                    String[] line = br.readLine().split(" ");
+                    int x = Integer.parseInt(line[0]); /**cate masini circula pe o singura banda**/
+                    ((SimpleMaintenance)Main.intersection).setX(x);
                 }
             };
             case "complex_maintenance" -> new ReaderHandler() {
