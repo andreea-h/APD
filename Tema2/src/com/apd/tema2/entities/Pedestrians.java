@@ -1,5 +1,6 @@
 package com.apd.tema2.entities;
 
+import com.apd.tema2.intersections.CrossWalk;
 import com.apd.tema2.utils.Constants;
 
 import static java.lang.Thread.sleep;
@@ -26,20 +27,43 @@ public class Pedestrians implements Runnable {
         while(System.currentTimeMillis() - startTime < executeTime) {
             try {
                 pedestriansNo++;
-                sleep(Constants.PEDESTRIAN_COUNTER_TIME);
 
-                if(pedestriansNo == maxPedestriansNo) {
+                sleep(Constants.PEDESTRIAN_COUNTER_TIME); /**a ajuns un pieton la trecere**/
+
+                if(pedestriansNo == maxPedestriansNo) { /**au ajuns toti pietonii la trecere**/
                     pedestriansNo = 0;
-                    pass = true;
-                    sleep(Constants.PEDESTRIAN_PASSING_TIME);
-                    pass = false;
+                    pass = true; /**s-au strans toti pietonii la trecere->se trece semaforul pe rosu**/
+
+                    /**notifica masinile ca semaforul este rosu**/
+                    synchronized (CrossWalk.obj) {
+                        CrossWalk.obj.notifyAll();
+                    }
+
+                    sleep(Constants.PEDESTRIAN_PASSING_TIME); /**timpul de trecere al pietonilot*/
+                    pass = false; /**semaforul devine din nou verde pt masini**/
+
+                    synchronized (CrossWalk.obj1) {
+                        CrossWalk.obj1.notifyAll();
+                    }
+                    /**notifica masinile ca semaforul este verde**/
+
+
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
+
+        synchronized (CrossWalk.obj) {
+            CrossWalk.obj.notifyAll();
+        }
+        synchronized (CrossWalk.obj1) {
+            CrossWalk.obj1.notifyAll();
+        }
+
         finished = true;
+
     }
 
     public boolean isPass() {

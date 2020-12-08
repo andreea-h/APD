@@ -87,6 +87,12 @@ public class ReaderHandlerFactory {
                 @Override
                 public void handle(final String handlerType, final BufferedReader br) throws IOException {
                     Main.intersection = IntersectionFactory.getIntersection("priority_intersection");
+                    String[] line = br.readLine().split(" ");
+                    int high = Integer.parseInt(line[0]);
+                    int low = Integer.parseInt(line[1]);
+                    ((PriorityIntersection)Main.intersection).setHighPrioCars(high);
+                    ((PriorityIntersection)Main.intersection).setLowPrioCars(low);
+                    ((PriorityIntersection)Main.intersection).setNotif();
                 }
             };
             case "crosswalk" -> new ReaderHandler() {

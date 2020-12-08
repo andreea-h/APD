@@ -108,7 +108,7 @@ public class IntersectionHandlerFactory {
                 @Override
                 public void handle(Car car) {
                     if (Main.intersection instanceof SimpleMaintenance) {
-                        Main.intersection.action(car);
+                        //Main.intersection.action(car);
                     }
                 }
             };
