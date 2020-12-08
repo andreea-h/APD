@@ -16,7 +16,7 @@ public class CrossWalk implements Intersection {
     public void action(Car car) {
 
            // if (Main.pedestrians.isPass() == false) { /**nu s-au strans suficienti pietoni**/
-           //     System.out.println("Car " + car.getId() + " has how green light");
+           //     System.out.println("Car " + car.getId() + " has  green light");
            // }
 
         while (Main.pedestrians.isFinished() == false) {
@@ -32,7 +32,7 @@ public class CrossWalk implements Intersection {
                     e.printStackTrace();
                 }
             }
-            //}
+
 
             synchronized (obj1) {
                 try {
@@ -49,7 +49,7 @@ public class CrossWalk implements Intersection {
 
         }
         if (check == false) {
-            System.out.println("Car " + car.getId() + " has how green light"); //are sens doar dupa red
+            System.out.println("Car " + car.getId() + " has now green light"); //are sens doar dupa red
         }
 
     }

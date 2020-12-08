@@ -110,7 +110,7 @@ public class ReaderHandlerFactory {
                 public void handle(final String handlerType, final BufferedReader br) throws IOException {
                     Main.intersection = IntersectionFactory.getIntersection("simple_maintenance");
                     String[] line = br.readLine().split(" ");
-                    int x = Integer.parseInt(line[0]); /**cate masini circula pe o singura banda**/
+                    int x = Integer.parseInt(line[0]); /**cate masini circula dintr-un sens pe o singura banda**/
                     ((SimpleMaintenance)Main.intersection).setX(x);
                 }
             };
