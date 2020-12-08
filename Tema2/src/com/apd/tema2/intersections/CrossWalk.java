@@ -14,16 +14,11 @@ public class CrossWalk implements Intersection {
     private boolean check = false;
 
     public void action(Car car) {
-
-           // if (Main.pedestrians.isPass() == false) { /**nu s-au strans suficienti pietoni**/
-           //     System.out.println("Car " + car.getId() + " has  green light");
-           // }
-
         while (Main.pedestrians.isFinished() == false) {
             check = false;
             synchronized (obj) {
                 try {
-                    while (Main.pedestrians.isPass() == false && Main.pedestrians.isFinished() == false) { /**cat timp nu au ajuns toti pietonii**/
+                    if (Main.pedestrians.isPass() == false && Main.pedestrians.isFinished() == false) { /**cat timp nu au ajuns toti pietonii**/
                         System.out.println("Car " + car.getId() + " has now green light");
                         check = true;
                         obj.wait();
@@ -36,7 +31,7 @@ public class CrossWalk implements Intersection {
 
             synchronized (obj1) {
                 try {
-                    while (Main.pedestrians.isPass() == true && Main.pedestrians.isFinished() == false) { /**cat timp trec pietoni**/
+                    if (Main.pedestrians.isPass() == true && Main.pedestrians.isFinished() == false) { /**cat timp trec pietoni**/
                         check = false;
                         System.out.println("Car " + car.getId() + " has now red light");
                         obj1.wait();

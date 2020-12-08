@@ -28,7 +28,7 @@ public class SimpleMaintenance implements Intersection {
             /**este permisa doar trecerea alternativa a masinilor dintr-un anumit sens**/
             synchronized (obj1) {
                 try {
-                    while (nr1Side.get() % x != 0 && nr1Side.get() != 0) {
+                    if (nr1Side.get() % x != 0 && nr1Side.get() != 0) {
                         obj1.wait();
                     }
                 }
@@ -47,18 +47,18 @@ public class SimpleMaintenance implements Intersection {
 
             System.out.println("Car " + car.getId() + " from side number " + car.getStartDirection() + " has passed the bottleneck");
             nr0Side.addAndGet(1);
-            synchronized (obj) {
-                if (nr0Side.get() % x == 0) {
-                    obj.notifyAll();
-                    semaphore1Side.release(x);
-                }
+             if (nr0Side.get() % x == 0) {
+                 synchronized (obj) {
+                     obj.notifyAll();
+                 }
+                 semaphore1Side.release(x);
             }
         }
         else {
             /** asteapta trecerea tuturor celor x masini de pe sensul 0 **/
             synchronized (obj) {
                 try {
-                    while (nr0Side.get() % x != 0) {
+                    if (nr0Side.get() % x != 0) {
                         obj.wait();
                     }
                 }
