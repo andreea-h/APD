@@ -121,7 +121,9 @@ public class IntersectionHandlerFactory {
             case "railroad" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    
+                    if (Main.intersection instanceof Railroad) {
+                        Main.intersection.action(car);
+                    }
                 }
             };
             default -> null;

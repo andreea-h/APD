@@ -21,6 +21,7 @@ public class IntersectionFactory {
          cache.put("priority_intersection", new PriorityIntersection());
          cache.put("crosswalk", new CrossWalk());
          cache.put("simple_maintenance", new SimpleMaintenance());
+         cache.put("railroad", new Railroad());
     }
 
     public static Intersection getIntersection(String handlerType) {
