@@ -21,6 +21,7 @@ public class IntersectionFactory {
          cache.put("priority_intersection", new PriorityIntersection());
          cache.put("crosswalk", new CrossWalk());
          cache.put("simple_maintenance", new SimpleMaintenance());
+         cache.put("complex_maintenance", new ComplexMaintenance());
          cache.put("railroad", new Railroad());
     }
 

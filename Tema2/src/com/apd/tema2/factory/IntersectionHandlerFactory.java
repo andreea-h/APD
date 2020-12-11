@@ -115,7 +115,9 @@ public class IntersectionHandlerFactory {
             case "complex_maintenance" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    
+                    if (Main.intersection instanceof ComplexMaintenance) {
+                        Main.intersection.action(car);
+                    }
                 }
             };
             case "railroad" -> new IntersectionHandler() {

@@ -26,6 +26,7 @@ public class SimpleMaintenance implements Intersection {
 
         if (car.getStartDirection() == 0) {
             /**este permisa doar trecerea alternativa a masinilor dintr-un anumit sens**/
+            /**este permisa trecerea pe sensul 0 daca au trecut cele x masini de pe sensul 1**/
             synchronized (obj1) {
                 try {
                     if (nr1Side.get() % x != 0 && nr1Side.get() != 0) {
