@@ -22,6 +22,10 @@ public class ComplexMaintenance implements Intersection {
     Semaphore[] semaphores; /**vector de semafoare care controleaza ca masinile sa porneasca in ordinea in care au ajuns de pe o banda veche**/
     Semaphore[] semaphores1;
     List<AtomicInteger> nrCars;
+    List<AtomicInteger> nrCarsIn;
+
+    List<ArrayBlockingQueue> lanes; /**lista de lanuri**/
+
     List<ArrayBlockingQueue> carsInOrder; /**masinile retinute pe fiecare sens in ordinea sosirii**/
     Object obj;
     Semaphore semaphore2;
@@ -30,8 +34,8 @@ public class ComplexMaintenance implements Intersection {
     /**intoarce valoarea 0 daca banda testBand trebuie redirectata catre banda newBand**/
     public int getSpecificBand(int newBand, int testBand) {
         int i;
-        int start = newBand * (int) Math.ceil((double) initialLines / freeLines);
-        int end = Math.min(initialLines, (newBand + 1) * (int) Math.floor((double) initialLines / freeLines));
+        int start = newBand * /*(int) Math.ceil((double)*/ (initialLines / freeLines);
+        int end = Math.min(initialLines, (newBand + 1) * /*(int) Math.floor((double)*/ (initialLines / freeLines));
         if (testBand >= start && testBand < end) {
             return 0;
         }
@@ -54,6 +58,9 @@ public class ComplexMaintenance implements Intersection {
         elems.add(car.getId());
         carsInOrder.set(car.getStartDirection(), elems);
         nrCars.get(car.getStartDirection()).addAndGet(1);
+        int band = car.getStartDirection();
+        int newBand = getNewBand(band);
+        lanes.get(newBand).add(car.getStartDirection());
 
         /**asteapta pana toate masinile s-au incolonat**/
         try {
@@ -61,19 +68,20 @@ public class ComplexMaintenance implements Intersection {
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-
         if (car.getId() == 0) {
             int i;
             for (i = 0; i < initialLines; i++) {
-                if (nrCars.get(car.getStartDirection()).get() < x) {
+                if (nrCars.get(i).get() < x) {
                     try {
-                        semaphores[car.getId()].acquire(x);
-                        semaphores[car.getId()].release(nrCars.get(car.getStartDirection()).get());
+                        semaphores[i].acquire(x); /**prin semaphores se retine numarul de masini care vin de pe fiecare banda initiala la o iteratie**/
+                        semaphores[i].release(nrCars.get(i).get());
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
+               // System.out.println("Masini masini care pot veni pe directia " + i +  ": " + semaphores[i].availablePermits());
+              //  System.out.println("Masini care au venit pe directia " + i +  ": " + nrCars.get(i).get());
             }
         }
 
@@ -83,56 +91,46 @@ public class ComplexMaintenance implements Intersection {
             e.printStackTrace();
         }
 
-        int band = car.getStartDirection();
+        while ((int)lanes.get(newBand).peek() != car.getStartDirection()) {
+        }
+
         /**asigura ca ordinea masinilor la trecere este aceeasi cu ordinea sosirii lor**/
         while ((int)carsInOrder.get(car.getStartDirection()).peek() != (int)(car.getId())) {
         }
-        try {
-            semaphores1[car.getStartDirection()].acquire();
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        try {
-            semaphore3[car.getStartDirection()].acquire();
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        try {
-            semaphore2.acquire();
-        }
-        catch (InterruptedException e){
-            e.printStackTrace();
-        }
 
+        try {
+            semaphores[car.getStartDirection()].acquire();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         /**maxim x masini pot face 'entered' pe cate unul dintre cele free_lines sensuri**/
-        int newBand = getNewBand(band);
+
         System.out.println("Car " + car.getId() + " from the lane " +
                 car.getStartDirection() + " has entered lane number " + newBand);
         carsInOrder.get(car.getStartDirection()).poll();
+        lanes.get(newBand).poll();
         nrCars.get(car.getStartDirection()).addAndGet(-1);
+        nrCarsIn.get(car.getStartDirection()).addAndGet(1);
 
-        /**nu mai trebuie sa vina nicio masina de pe acea banda**/
-        if (nrCars.get(car.getStartDirection()).get() == 0) {
-            System.out.println("The initial lane " + car.getStartDirection() +" has been emptied and removed from the new lane queue");
-        }
-        else {
-            System.out.println("The initial lane " + car.getStartDirection() + " has no permits and is moved to the back of the new lane queue");
-        }
-
-        if (nrCars.get(car.getStartDirection()).get() < x) {
-            semaphores1[car.getStartDirection()].release(nrCars.get(car.getStartDirection()).get());
-        }
-        else {
-            semaphores1[car.getStartDirection()].release(x);
-        }
-
-        if (semaphore3[car.getStartDirection()].availablePermits() == 0) {
-            semaphore3[car.getStartDirection()].release(x);
-        }
-        if (semaphore2.availablePermits() == 0) {
-            semaphore2.release(x * freeLines);
+        if (nrCarsIn.get(car.getStartDirection()).get() % x == 0) {
+            if (nrCars.get(car.getStartDirection()).get() == 0) {
+                System.out.println("The initial lane " + car.getStartDirection() +" has been emptied and removed from the new lane queue");
+            }
+            else {
+                System.out.println("The initial lane " + car.getStartDirection() + " has no permits and is moved to the back of the new lane queue");
+                lanes.get(newBand).add(car.getStartDirection());
+                semaphores[car.getStartDirection()].release(x);
+                if (nrCars.get(car.getStartDirection()).get() < x) {
+                    try {
+                        semaphores[car.getStartDirection()].acquire(x);
+                    }
+                    catch(InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    semaphores[car.getStartDirection()].release(nrCars.get(car.getStartDirection()).get());
+                }
+            }
         }
     }
 
@@ -144,18 +142,26 @@ public class ComplexMaintenance implements Intersection {
         semaphores = new Semaphore[initialLines];
         semaphores1 = new Semaphore[initialLines];
         nrCars = Collections.synchronizedList(new ArrayList<AtomicInteger>());
+        nrCarsIn = Collections.synchronizedList(new ArrayList<AtomicInteger>());
         obj = new Object();
         int i;
 
         for (i = 0; i < initialLines; i++) {
             nrCars.add(new AtomicInteger(0));
+            nrCarsIn.add(new AtomicInteger(0));
         }
 
         for (i = 0; i < initialLines; i++) {
-            semaphores[i] = new Semaphore(0, true);
+            semaphores[i] = new Semaphore(x, true);
             semaphores1[i] = new Semaphore(x, true);
         }
         carsInOrder = Collections.synchronizedList(new ArrayList<>());
+
+        lanes = Collections.synchronizedList(new ArrayList<>());
+        for (i = 0; i < freeLines; i++) {
+            lanes.add(new ArrayBlockingQueue<Integer>(Main.carsNo));
+        }
+
         for (i = 0; i < initialLines; i++) {
             carsInOrder.add(new ArrayBlockingQueue<Integer>(Main.carsNo));
         }
