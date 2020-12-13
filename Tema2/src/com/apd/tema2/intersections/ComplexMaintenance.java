@@ -107,37 +107,15 @@ public class ComplexMaintenance implements Intersection {
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
-        newBand.set(getNewBand(car.getStartDirection()));
 
-        synchronized (objs[newBand.get()]) {
-            if (nrCarsNewLane.get(newBand.get()) != 0) {
-                try {
-                    objs[newBand.get()].wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
+        /*newBand.set(getNewBand(car.getStartDirection()));
+        System.out.println("Banda noua accesata: " + newBand.get());
         while((int)lanes.get(newBand.get()).peek() != car.getStartDirection()) {
-        }
+        }*/
+
 
         /**asigura ca ordinea masinilor la trecere este aceeasi cu ordinea sosirii lor**/
         while ((int) carsInOrder.get(car.getStartDirection()).peek() != (int) (car.getId())) {
-        }
-
-        nrCarsNewLane.set(newBand.get(), nrCarsNewLane.get(newBand.get()) + 1); //numarul de masini care au trecut pe lanul nou curent
-        System.out.println("Masina intrata este: " + car.getId());
-        newBand.set(getNewBand(car.getStartDirection()));
-        while((int)lanes.get(newBand.get()).peek() != car.getStartDirection()) {
-
-        }
-
-        try {
-            semaphore2.acquire();
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         try {
@@ -146,6 +124,36 @@ public class ComplexMaintenance implements Intersection {
         catch (InterruptedException e) {
             e.printStackTrace();
         }
+/*
+        try {
+            semaphore2.acquire();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        System.out.println("Masina intrata este: " + car.getId());
+        nrCarsNewLane.set(newBand.get(), nrCarsNewLane.get(newBand.get()) + 1); //numarul de masini care au trecut pe lanul nou curent
+
+        if (nrCarsNewLane.get(newBand.get()).equals(0)) {
+            while ((int)lanes.get(newBand.get()).peek() != car.getStartDirection()) {
+
+            }
+        }
+        else {
+            synchronized (obj) {
+                try {
+                    newBand.set(getNewBand(car.getStartDirection()));
+                    while ((int)lanes.get(newBand.get()).peek() != car.getStartDirection() && !(nrCarsNewLane.get(newBand.get()).equals(0))) {
+                        obj.wait();
+                    }
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
 
         //asteapta pana cand banda veche a masinii este prima in lista de astepare
         /**maxim x masini pot face 'entered' pe cate unul dintre cele free_lines sensuri**/
@@ -160,24 +168,24 @@ public class ComplexMaintenance implements Intersection {
 
         if (nrCarsIn.get(car.getStartDirection()).get() % x == 0) {
             if (nrCars.get(car.getStartDirection()).get() == 0) {
-                newBand.set(getNewBand(car.getStartDirection()));
-                synchronized (objs[newBand.get()]) {
+                synchronized (obj) {
+                    newBand.set(getNewBand(car.getStartDirection()));
                     System.out.println("The initial lane " + car.getStartDirection() +" has been emptied and removed from the new lane queue");
                     lanes.get(newBand.get()).poll();
                     System.out.println("Banda la stergere este: " + lanes.get(newBand.get()));
-                    objs[newBand.get()].notify();
+                    obj.notify();
                 }
             }
             else {
-                newBand.set(getNewBand(car.getStartDirection()));
-                synchronized (objs[newBand.get()]) {
+                synchronized (obj) {
+                    newBand.set(getNewBand(car.getStartDirection()));
                     System.out.println("The initial lane " + car.getStartDirection() + " has no permits and is moved to the back of the new lane queue");
                     lanes.get(newBand.get()).poll();
                     if (lanes.get(newBand.get()).contains(car.getStartDirection()) == false) {
                         lanes.get(newBand.get()).add(car.getStartDirection());
                     }
                     System.out.println("Banda permutata este: " + lanes.get(newBand.get()));
-                    objs[newBand.get()].notify();
+                    obj.notify();
                 }
                 semaphores[car.getStartDirection()].release(x);
                 if (nrCars.get(car.getStartDirection()).get() < x) {
