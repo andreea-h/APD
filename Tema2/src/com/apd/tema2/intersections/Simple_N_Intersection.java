@@ -36,7 +36,7 @@ public class Simple_N_Intersection implements Intersection {
     }
 
     public void setT(int T) {
-        this.T = T;
+        this.T = T; /**timpul cat dureaza ca fiecare masina sa paraseasca sensul giratoriu**/
     }
 
 

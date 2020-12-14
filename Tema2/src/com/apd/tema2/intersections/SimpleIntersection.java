@@ -4,7 +4,6 @@ import com.apd.tema2.entities.Car;
 import com.apd.tema2.entities.Intersection;
 
 public class SimpleIntersection implements Intersection {
-    // Define your variables here.
 
     public void action(Car car) {
         System.out.println("Car " + car.getId() + " has reached the semaphore, now waiting...");

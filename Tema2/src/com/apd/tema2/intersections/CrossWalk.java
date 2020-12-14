@@ -8,45 +8,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CrossWalk implements Intersection {
 
-    public static Object obj = new Object();
-    public static Object obj1 = new Object();
-    public static Object obj3 = new Object();
+    public static final Object green = new Object();
+    public static final Object red = new Object();
     private boolean check = false;
 
     public void action(Car car) {
-        while (Main.pedestrians.isFinished() == false) {
+        while (!(Main.pedestrians.isFinished())) {
             check = false;
-            synchronized (obj) {
+            synchronized (green) {
                 try {
-                    if (Main.pedestrians.isPass() == false && Main.pedestrians.isFinished() == false) { /**cat timp nu au ajuns toti pietonii**/
+                    /**cat timp nu au ajuns toti pietonii**/
+                    if (!(Main.pedestrians.isPass()) && !(Main.pedestrians.isFinished())) {
                         System.out.println("Car " + car.getId() + " has now green light");
                         check = true;
-                        obj.wait();
+                        green.wait();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-
-
-            synchronized (obj1) {
+            synchronized (red) {
                 try {
-                    if (Main.pedestrians.isPass() == true && Main.pedestrians.isFinished() == false) { /**cat timp trec pietoni**/
+                    /**cat timp trec pietoni**/
+                    if (Main.pedestrians.isPass() && !(Main.pedestrians.isFinished())) {
                         check = false;
                         System.out.println("Car " + car.getId() + " has now red light");
-                        obj1.wait();
+                        red.wait();
                     }
-
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-
         }
-        if (check == false) {
-            System.out.println("Car " + car.getId() + " has now green light"); //are sens doar dupa red
+        if (!check) {
+            System.out.println("Car " + car.getId() + " has now green light"); /**are sens doar dupa ce sem a for red**/
         }
-
     }
-
 }

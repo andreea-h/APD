@@ -14,10 +14,8 @@ public class SimpleMaintenance implements Intersection {
     int x; /**cate masini vor circula pe o singura banda**/
     Semaphore semaphore0Side;
     Semaphore semaphore1Side;
-    Semaphore sem;
-    Object obj, obj1;
-    CyclicBarrier barrier0;
-    CyclicBarrier barrier1;
+    public final Object obj = new Object();
+    public final Object obj1 = new Object();
     AtomicInteger nr0Side; /**numarul de masini care au trecut pe sensul 0**/
     AtomicInteger nr1Side;
 
@@ -83,14 +81,12 @@ public class SimpleMaintenance implements Intersection {
                 semaphore0Side.release(x);
             }
         }
-
     }
+
     public void setX(int x) {
         this.x = x;
         semaphore0Side = new Semaphore(x);
         semaphore1Side = new Semaphore(0);
-        obj = new Object();
-        obj1 = new Object();
         nr0Side = new AtomicInteger(0);
         nr1Side = new AtomicInteger(0);
     }

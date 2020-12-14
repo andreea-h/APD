@@ -7,16 +7,13 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 
-
 /**intersectie in care poate intra o singura masina din fiecare directie la un moment de timp**/
 public class SimpleStrict_1_CarRoundabout implements Intersection {
     int noDirections; /**numarul de directii din care pot veni masinile**/
     int T; /**timpul cat sta o masina in intersectie**/
 
     Semaphore[] semaphores; /**tine controlul asupra numarului de masini care pot intra in intersectie din fiecare directie**/
-    CyclicBarrier barrier; /**sincronizeaza masinile a.i. ele nu intra in intersectie pana cand nu intra excat una din fiecare directie**/
-    Semaphore directionsSemaphore; /**controleaza ca fiecare directie din intersectie sa fie ocupata la un moment de timp**/
-
+    CyclicBarrier barrier; /**sincronizeaza masinile a.i. ele nu intra in intersectie pana cand nu intra exact una din fiecare directie**/
 
     public void action(Car car) {
         System.out.println("Car " + car.getId() + " has reached the roundabout");
@@ -48,7 +45,6 @@ public class SimpleStrict_1_CarRoundabout implements Intersection {
         semaphores[car.getStartDirection()].release();
     }
 
-
     public void setNoDirections(int noDirections) {
         this.noDirections = noDirections;
         semaphores = new Semaphore[noDirections];
@@ -56,7 +52,7 @@ public class SimpleStrict_1_CarRoundabout implements Intersection {
         for (i = 0; i < noDirections; i++) {
             semaphores[i] = new Semaphore(1);
         }
-        //directionsSemaphore = new Semaphore(noDirections);
+        /**la bariera sunt asteptate cate o masini din fiecare directie**/
         barrier = new CyclicBarrier(noDirections);
     }
 

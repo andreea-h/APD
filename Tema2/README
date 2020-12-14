@@ -1,3 +1,58 @@
+Readme Tema#2 APD - Traffic simulator
+Student: Horovei Andreea-Georgiana
+Grupa: 335CC
+
+In cadrul implementarii am definit cate o clasa pentru fiecare cerinta, clasele definite implementand interfata Intersection. In fiecare clasa este implementata metoda action(Car car), metoda care ajunge sa se execute la pornirea fiecarui thread de tip Car.
+
+Cerinta 1: Simple Semaphore 
+(implementare in clasa SimpleIntersection)
+
+	In implementarea cerintei 1, fiecare masina afiseaza mesajul prin care
+anunta ca a ajuns la semafor, iar dupa afisarea mesajului fiecare apeleaza sleep(time), unde time este timpul de asteptare la semafor al fiecarei masini (preluat pentru fiecare masina apeland car.getWaitingTime()). 
+	Dupa finalizarea sleep-ului, fiecare masina afiseaza mesajul prin care 
+anunta ca a incheiat asteptarea la semafor. La aceasta cerinta nu se folosesc mecanisme speciale de sincronizare intrucat din scenariul descris se deduce ca deplasarea fiecarei masini este independenta de deplasarea celorlalte masini.
+
+
+Cerinta 2: Simple_n_roundabout 
+(implementare in clasa Simple_N_Intersection)
+
+	Pentru a controla numarul de masini care pot intra in sensul giratoriu, am 
+folosit o variabila de tipul Semaphore, initializata cu numarul maxim de masini care se pot intra in sensul giratoriu. Valorile pentru N - numarul maxim de masini care pot intra in sensul giratoriu, respectiv T- timpul cat dureaza ca fiecare masina sa paraseasca sensul sunt membri ai clasei Simple_N_Intersection si initializate prin metodele setN si setT. 
+	Fiecare masina afiseaza mesajul prin care anunta ca a ajuns la sensul 
+giratoriu, apoi incearca sa faca acquire() pe semaforul initializat cu valoarea N, urmand sa afiseze mesajul prin care anunta ca a intrat in sensul giratoriu. Apoi este efectuata operatia sleep() pentru T/1000 secunde, afisand ulterior mesajul prin care masina anunta iesirea din sens. Dupa afisarea mesajului este efectuat release() pe semafor pentru a se permite masinilor care sunt in asteptare sa poata sa efectueze operatia acquire() pe semafor si sa intre, astfel, in sensul giratoriu.
+
+Cerinta 3: Simple_strict_1_car_roundabout
+(implemenare in clasa SimpleStrict_1_CarRoundabout)
+
+	Mecanismele de sincronizare pe care le-am folosit la acest task sunt:
+-> un vector de variabile de tipul Semaphore cu dimeniunea egala cu numarul de directii din care pot veni masinile - pentru a controla ca o singura masina din fiecare directie sa poata intra in intersectie la un moment de timp
+-> o bariera (initializata cu numarul de directii din care vin masini) pentru a astepta masini astfel incat ele sa intre in intersectie doar atunci cand intra exact una din fiecare directie.
+	Thread-ul de tip Car afiseaza mesajul prin care anunta ca a ajuns la 
+intersectie, apoi se astepta la bariera un numar de nrDirections (directiile din care pot veni masini) masini. In continuare thread-ul incearca sa faca acquire pe variabila semafor din vector, aflata la pozitia egala cu directia de pe care a venit masina (operatia acquire va reusi atunci cand in intersectie nu se afla nicio masina care a venit pe acea directie). Dupa efectuarea operatiei acquire(), se afiseaza mesajul prin care masina anunta ca a ajuns in intersectie, apoi se face release pe variabila semafor din vector corespunzatore directiei de pe care a venit masina, pentru a permite si altei masini aflata in asteptare pe aceeasi directie sa intre in intersectie.
+
+Cerinta 4: simple_strict_x_car_roundabout
+Cerinta 5: simple_max_x_car_roundabout
+
+
+
+Cerinta 6: Priority_intersection
+	Mecanismul de sincronizare pe care l-am folosit la aceasta cerinta este o 
+variabila de tip Semaphore, pentru care am definit o operatie in plus care sa permita reducerea valorii semaforului la orice moment (fara a intra in asteptare ca la acquire). Mai exact am definit o clasa interna ModifiedSemaphore care extinde clasa Semaphore si contine metoda resize. Metoda resize primeste care parametru o valoarea delta si face operatia 
+reducePermits(Math.abs(delta)) pe instanta curenta de clasa pentru care este apelata (in cazul nostru o variabila de tipul Sempahore). 
+	In functie de prioritatea masinii este afisat mesajul prin care o 
+masina anunta ca a ajuns la intersectie: pentru prioritate diferita de 1 se intra direct in intersectie si pentru prioritate 1, se incearca intrarea in intersectie. 
+	Variabila semafor folosita este initializata cu 1. Cand o masina cu 
+prioritatea mare intra in intersectie se va efectua operatia resize(1) pe semafor, astfel incat o masina cu prirotate mica sa nu mai aiba acces sa intre in intersectie pana in momentul in care masina cu prioritate mare ieise din intersectie (la finalizarea sleep-ului) si face release pe semafor. 
+	Masinile cu prioritate mica fac acquire pe semafor pentru a incerca sa 
+intre in intersectie (operatia reuseste cand in intersectie nu se afla nicio masina cu prioritate mare); la iesirea din intersectie se face release pe semafor.
+
+Cerinta 7: Crosswalk ****************************8
+	Mecanismele de sincronizare pe care le-am folosit la aceasta cerinta sunt 
+wait-notifyAll si synchronized, alaturi de 2 obiecte (tipul Object) care detin monitor lock-ul la un moment dat si pe care se apeleaza wait si notifyAll.
+	In metoda run din clasa Pedestrians, dupa ce pass = true (cu semnificatia 
+ca s-au strans toti pietonii), semaforul pentru masini trebuie sa devina rosu-> se apeleaza notifyAll pe obiectul care detine monitor-lock-ul cat timp semaforul pentru masini este verde.
+
+
 Cerinta 8: Simple Maintenance
 Pentru implementarea sincronizarii am folosit 2 variabile de tipul Semaphore, una
 prin care se asigura faptul ca pe banda 0 pot circula x masini la un moment dat, respectiv un semafor care controleaza circulatia a x masini pe banada 1 de mers (a.i. nu va fi depasit numarul de x masini care mers la un mmoment dat pe o anume banda). La initializare, semaforul aferent sensului 0 este initializat cu valoarea x, iar semaforul aferent sensului 1 este initializat cu valoarea 0 
@@ -6,3 +61,7 @@ Am folosit 2 varibile de tipul AtomicInteger care au afisat "passed the bottlene
 care au trecut, mergand pe unul dintre sensuri, devine multiplu al lui x, sunt 
 notificate masinile de pe sensul opus, aflate la acel moment in asteptare. Dupa ce ies din asteptare, masinile verifica daca pot face acquire() pe variabila semafor aferenta sensul corespunzator de mers (a.i. sa nu se depasesca numarul de x maximi care merg pe un sens la un moment dat). Daca s-a putut face acquire(), masina afiseaza mesajul aferent de trecere si incrementeaza variabila 
 care contorizeaza numarul de masini de pe sensul aferent care au realizat trecerea. Daca numarul de masini care au realizat trecerea pe sensul curent devine multiplu al lui x, se face release cu valoarea x pe semaforul aferent sensului opus de mers a.i. sa se permita doar circulatia in mod alternativ a cate exact x masini pe o singura banda.
+
+
+Cerinta 9: complex_maintenance
+Cerinta 10: railroad

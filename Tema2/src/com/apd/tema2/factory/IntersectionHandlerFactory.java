@@ -64,7 +64,6 @@ public class IntersectionHandlerFactory {
                 @Override
                 public void handle(Car car) {
                     // Get your Intersection instance
-
                     System.out.println("Car " + car.getId() + " has reached the roundabout from lane " + car.getStartDirection());
 
                     /**timp de asteptare inainte ca masina sa intre in sensul giratoriu**/
@@ -83,7 +82,6 @@ public class IntersectionHandlerFactory {
             case "priority_intersection" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    // Get your Intersection instance
                     try {
                         sleep(car.getWaitingTime());
                     } catch (InterruptedException e) {
