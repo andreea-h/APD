@@ -18,19 +18,18 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
     Semaphore[] semaphores; /**tine controlul asupra numarului de masini care pot intra in intersectie din fiecare directie**/
     CyclicBarrier barrier;
     CyclicBarrier barrier1;
-    Object obj = new Object();
+    static final Object obj = new Object();
     AtomicInteger nrCars = new AtomicInteger(0);
 
     public void action(Car car) {
-        /**inainte de a trece mai departe trebuie ca toate masinile sa faca reached**/
         System.out.println("Car " + car.getId() + " has reached the roundabout, now waiting...");
+        /**inainte de a trece mai departe trebuie ca toate masinile sa faca reached**/
         try {
             barrier.await();
         }
         catch(InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-
 
         /**inainte de a face selectia unei masini trebuie ca toate masinile din runda precedenta sa fie iesite din intersectie**/
         try {
@@ -46,7 +45,6 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
             e.printStackTrace();
         }
 
-        /**pentru a intra in intersectie, fiecare masina asteapta sa primeasca accesul in intersectie cate o masina pe fiecare directie**/
         try {
             barrier1.await();
         }
@@ -55,7 +53,6 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
         }
 
         System.out.println("Car " + car.getId() + " has entered the roundabout from lane " + car.getStartDirection());
-
         try {
             Thread.sleep(T);
         }
@@ -65,8 +62,6 @@ public class SimpleStrict_X_CarRoundabout implements Intersection {
 
         synchronized (obj) {
             System.out.println("Car " + car.getId() + " has exited the roundabout after " + (int)T/1000 + " seconds");
-            /**inainte de a trece mai departe trebuie ca toate masinile sa paraseasca sensul giratoriu**/
-
             /**permite unei alte masini orientata pe aceeasi directie sa intre in intersectie**/
             semaphores[car.getStartDirection()].release();
             nrCars.getAndAdd(1);

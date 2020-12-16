@@ -63,9 +63,6 @@ public class IntersectionHandlerFactory {
             case "simple_max_x_car_roundabout" -> new IntersectionHandler() {
                 @Override
                 public void handle(Car car) {
-                    // Get your Intersection instance
-                    System.out.println("Car " + car.getId() + " has reached the roundabout from lane " + car.getStartDirection());
-
                     /**timp de asteptare inainte ca masina sa intre in sensul giratoriu**/
                     try {
                         sleep(car.getWaitingTime());
@@ -114,7 +111,7 @@ public class IntersectionHandlerFactory {
                 @Override
                 public void handle(Car car) {
                     if (Main.intersection instanceof ComplexMaintenance) {
-                        Main.intersection.action(car);
+                      //  Main.intersection.action(car);
                     }
                 }
             };

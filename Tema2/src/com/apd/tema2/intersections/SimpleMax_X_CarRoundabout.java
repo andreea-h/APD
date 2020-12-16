@@ -17,6 +17,7 @@ public class SimpleMax_X_CarRoundabout implements Intersection {
     Semaphore[] semaphores; /**tine controlul asupra numarului de masini care pot intra in intersectie din fiecare directie**/
 
     public void action(Car car) {
+        System.out.println("Car " + car.getId() + " has reached the roundabout from lane " + car.getStartDirection());
         try {
             semaphores[car.getStartDirection()].acquire();
         }

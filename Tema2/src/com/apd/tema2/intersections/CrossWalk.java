@@ -13,7 +13,7 @@ public class CrossWalk implements Intersection {
     private boolean check = false;
 
     public void action(Car car) {
-        while (!(Main.pedestrians.isFinished())) {
+        if (!(Main.pedestrians.isFinished())) {
             check = false;
             synchronized (green) {
                 try {
