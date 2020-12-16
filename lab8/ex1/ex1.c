@@ -20,11 +20,16 @@ int main (int argc, char *argv[])
     
     // First process starts the circle.
     if (rank == 0) {
+    	MPI_Status status;
         // First process starts the circle.
         // Generate a random number.
         // Send the number to the next process.
-    	int random_num = rand();
+    	int random_num = rand() % 100;
     	MPI_Send(&random_num, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    	
+    	//primeste o valoare de la procesul numtasks - 1
+    	MPI_Recv(&recv_num, 1, MPI_INT, numtasks - 1, 0, MPI_COMM_WORLD, &status);
+    	printf("Procesul cu rank-ul %d a primit numarul %d.\n", rank, recv_num);
 
     } else if (rank == numtasks - 1) {
         // Last process close the circle.
@@ -34,7 +39,7 @@ int main (int argc, char *argv[])
         MPI_Status status;
         MPI_Recv(&recv_num, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
         printf("Procesul cu rank-ul %d a primit numarul %d.\n", rank, recv_num);
-        recv_num++;
+        recv_num = recv_num + 2;
         MPI_Send(&recv_num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 
     } else {
@@ -45,7 +50,7 @@ int main (int argc, char *argv[])
         MPI_Status status;
     	MPI_Recv(&recv_num, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &status);
     	printf("Procesul cu rank-ul %d a primit numarul %d.\n", rank, recv_num);
-    	recv_num++;
+    	recv_num = recv_num + 2;
     	MPI_Send(&recv_num, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
     }
 
