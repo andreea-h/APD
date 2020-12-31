@@ -328,7 +328,53 @@ void *worker_data_processing_comedy(void *arg) {
 
 /*functia de thread executata de thread-ul de procesare de pe worker-ul horror*/
 void *worker_data_processing_SciFi(void *arg) {
+	//al saptelea cuvant de pe fiecare rand este inversat
+	char *paragraph = (char *) arg;
+	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
 
+	char *rest = paragraph;
+	//reentrant version of strtok
+	char *line = strtok_r(paragraph, "\n", &rest);
+	int count_words = 0;
+	
+	while (line != NULL) {
+		count_words = 0;
+		//line va reprezenta o linie din paragraf
+		//desparte linia in cuvinte si gaseste al saptelea cuvant de pe linie
+		char *line_copy  = strdup(line);
+		char *copy = line_copy;
+		char *word = strtok_r(line_copy, " ", &copy);
+		strcat(processed_paragraph, word);
+		strcat(processed_paragraph, " ");
+		while (word != NULL) {
+			
+			word = strtok_r(NULL, " ", &copy);
+			count_words++;
+			if (word != NULL) {
+				if (count_words == 6) {
+					printf("al saptelea cuvant: %s\n", word);
+					int i, length = strlen(word);
+					char *reverse_word = (char *)malloc(strlen(word) * sizeof(char));
+					for (i = 0; i < length; i++) {
+						reverse_word[length - i - 1] = word[i];
+					}
+					strcat(processed_paragraph, reverse_word);
+				}
+				else {
+					printf("cuvant: %s\n", word);
+					strcat(processed_paragraph, word);
+				}
+				strcat(processed_paragraph, " ");
+			}
+		}
+		line = strtok_r(NULL, "\n", &rest);
+		if (line != NULL) {
+			strcat(processed_paragraph, "\n");
+		}
+	}
+
+	void *result = processed_paragraph;
+	return result;
 }
 
 /*functia de thread executata de thread-ul de procesare de pe worker-ul horror*/
@@ -339,12 +385,39 @@ void *worker_data_processing_fantasy(void *arg) {
 	//prima litera a fiecarui cuvant trebuie facuta majuscula
 	printf("textul care ajunge la thread: %s\n", paragraph);
 	char *token = strtok(paragraph, " ");
+	bool ok = false;
+	int i;
 	while (token != NULL) {
+		ok = false;
 		char *new_token = (char *)malloc(strlen(token) * sizeof(char));
 		strcpy(new_token, token);
-		
 		new_token[0] = toupper(new_token[0]);
+		for (i = 1; i < strlen(token); i++) {
+			if (token[i] == '\n') {
+				ok = true;
+				break;
+			}
+		}
+		//separa ultimul cuvant de pe rand si primul cuvant de pe urmatorul rand
+		if (ok == true) {
+			char *dest1 = (char *)malloc(sizeof(char) * i);
+			strncpy(dest1, new_token, i);
+			strcat(processed_paragraph, dest1);
+			strcat(processed_paragraph, "\n");
 
+			int j;
+			//este extras primul cuvant de pe linie
+			new_token[i + 1] = toupper(new_token[i + 1]);
+			char *dest2 = (char *)malloc(sizeof(char) * (strlen(token) - i));
+			strcpy(dest2, new_token + i + 1);
+			strcat(processed_paragraph, dest2);
+			if (token[strlen(token)] != '\n') {
+				strcat(processed_paragraph, " ");
+			}	
+
+			token = strtok(NULL, " ");
+			continue;
+		}
 		if (processed_paragraph == NULL) { 
 			strcpy(processed_paragraph, new_token);
 		}
@@ -426,6 +499,17 @@ void *worker_reader_f(void *arg) {
 	}
 	else if (worker_rank == 3) {
 		r = pthread_create(&processing_thread, NULL, worker_data_processing_SciFi, (void *)paragraph);
+		if (check_thread_start(r, worker_rank) == false) {
+			exit(-1);
+		}
+
+		void *processed_paragraph_sci_fi;
+    	r = pthread_join(processing_thread, &processed_paragraph_sci_fi);
+    	if (r != 0) {
+    		printf("Eroare la asteptarea thread-ului de procesare in worker-ul %ld\n", worker_rank);
+    		exit(-1);
+   		}
+    	printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_sci_fi);
 	}
 	else if (worker_rank == 4) {
 		r = pthread_create(&processing_thread, NULL, worker_data_processing_fantasy, (void *)paragraph);
