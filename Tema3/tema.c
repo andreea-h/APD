@@ -249,7 +249,7 @@ void *worker_data_processing_horror(void *arg) {
 		}
 	}
 	processed_paragraph = (char *)malloc((strlen(paragraph) + k) * sizeof(char));
-	for (i = 0; i < strlen(paragraph); i++) {
+	for (i = 0; i <= strlen(paragraph); i++) {
 		processed_paragraph[strlen(processed_paragraph)] = paragraph[i];
 		if (isLetter(paragraph[i]) == true) {
 			//verifaca daca litera este consoana
@@ -259,7 +259,6 @@ void *worker_data_processing_horror(void *arg) {
 			}
 		}
 	}
-
 	void *result = processed_paragraph;
 	return result;
 }
@@ -269,57 +268,24 @@ void *worker_data_processing_comedy(void *arg) {
 	char *paragraph = (char*) arg;
 	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
 
-	char *token = strtok(paragraph, " ");
+	char *copy = strdup(paragraph);
+	char *res = strdup(paragraph);
+
+	char *token = strtok_r(paragraph, " \n", &res);
 	bool ok = false;
 	while (token != NULL) {
-		ok = false;
-		char *new_token = (char *)malloc(strlen(token) * sizeof(char));
-		strcpy(new_token, token);
-		//fiecare litera de pe pozitie para este facuta majuscula
 		int i;
-		for (i = 1; i < strlen(new_token); i++) {
-			if (token[i] != '\n' && i % 2 == 1) {
-				new_token[i] = toupper(new_token[i]);
-			}
-			else if (token[i] == '\n') {
-				ok = true;
-				break;
-			}
+		for (i = 1; i < strlen(token); i = i + 2) {
+			token[i] = toupper(token[i]);
 		}
-		//s-a idenificat finalul de linie
-		if (ok == true) {
-			char *dest1 = (char *)malloc(sizeof(char) * i);
-			strncpy(dest1, new_token, i);
-			strcat(processed_paragraph, dest1);
-			strcat(processed_paragraph, "\n");
-
-			int j;
-			//este extras primul cuvant de pe linie
-			for (j = i + 2; j < strlen(new_token); j = j + 2) {
-				new_token[j] = toupper(new_token[j]);
-			}
-			char *dest2 = (char *)malloc(sizeof(char) * (strlen(token) - i));
-			strcpy(dest2, new_token + i + 1);
-			strcat(processed_paragraph, dest2);
-			if (token[strlen(token)] != '\n') {
-				strcat(processed_paragraph, " ");
-			}	
-
-			token = strtok(NULL, " ");
-			continue;
-		}
-
-
-		if (processed_paragraph == NULL) { 
-			strcpy(processed_paragraph, new_token);
-		}
-		else {
-			strcat(processed_paragraph, new_token);
-		}
-		token = strtok(NULL, " ");
-		if (token != NULL && token[strlen(token)] != '\n') {
+		strcat(processed_paragraph, token);
+		if (copy[token - paragraph + strlen(token)] == ' ') {
 			strcat(processed_paragraph, " ");
 		}
+		else {
+			strcat(processed_paragraph, "\n");
+		}
+		token = strtok_r(NULL, " \n", &res);
 	}
 
 	void *result = processed_paragraph;
@@ -352,7 +318,6 @@ void *worker_data_processing_SciFi(void *arg) {
 			count_words++;
 			if (word != NULL) {
 				if (count_words == 6) {
-					printf("al saptelea cuvant: %s\n", word);
 					int i, length = strlen(word);
 					char *reverse_word = (char *)malloc(strlen(word) * sizeof(char));
 					for (i = 0; i < length; i++) {
@@ -361,7 +326,6 @@ void *worker_data_processing_SciFi(void *arg) {
 					strcat(processed_paragraph, reverse_word);
 				}
 				else {
-					printf("cuvant: %s\n", word);
 					strcat(processed_paragraph, word);
 				}
 				strcat(processed_paragraph, " ");
@@ -372,7 +336,7 @@ void *worker_data_processing_SciFi(void *arg) {
 			strcat(processed_paragraph, "\n");
 		}
 	}
-
+	strcat(processed_paragraph, "\n");
 	void *result = processed_paragraph;
 	return result;
 }
@@ -383,7 +347,6 @@ void *worker_data_processing_fantasy(void *arg) {
 	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
 
 	//prima litera a fiecarui cuvant trebuie facuta majuscula
-	printf("textul care ajunge la thread: %s\n", paragraph);
 	char *token = strtok(paragraph, " ");
 	bool ok = false;
 	int i;
@@ -466,6 +429,9 @@ void *worker_reader_f(void *arg) {
 
 
 	//porneste atatea thread-uri de cat este nevoie pt a procesa paragraful in functie de numarul de linii din paragraf
+
+	//valoarea intoarsa la join reprezinta paragraful procesat conform cu tipul acestuia
+	//ulterior paragraful procesat conform cu tipul acestuia este trimis catre Master
 	int r;
 	pthread_t processing_thread;
 	if (worker_rank == 1) {
@@ -479,8 +445,10 @@ void *worker_reader_f(void *arg) {
     		printf("Eroare la asteptarea thread-ului de procesare in worker-ul %ld\n", worker_rank);
     		exit(-1);
     	}
-    	printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_horror);
+    	//printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_horror);
 
+    	//trimite paragraful procesat catre master
+    	MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
 	}
 	else if (worker_rank == 2) {
 		r = pthread_create(&processing_thread, NULL, worker_data_processing_comedy, (void *)paragraph);
@@ -494,7 +462,10 @@ void *worker_reader_f(void *arg) {
     		printf("Eroare la asteptarea thread-ului de procesare in worker-ul %ld\n", worker_rank);
     		exit(-1);
    		}
-    	printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_comedy);
+    	//printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_comedy);
+
+    	//trimite paragraful procesat catre master
+    	MPI_Send(processed_paragraph_comedy, strlen(processed_paragraph_comedy) + 1, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
     
 	}
 	else if (worker_rank == 3) {
@@ -510,6 +481,8 @@ void *worker_reader_f(void *arg) {
     		exit(-1);
    		}
     	printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_sci_fi);
+    	//trimite paragraful procesat catre master
+    	MPI_Send(processed_paragraph_sci_fi, strlen(processed_paragraph_sci_fi) + 1, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
 	}
 	else if (worker_rank == 4) {
 		r = pthread_create(&processing_thread, NULL, worker_data_processing_fantasy, (void *)paragraph);
@@ -523,11 +496,16 @@ void *worker_reader_f(void *arg) {
     		printf("Eroare la asteptarea thread-ului de procesare in worker-ul %ld\n", worker_rank);
     		exit(-1);
    		}
-    	printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_fantasy);
+    	//printf("Textul procesat in worker-ul %ld este:%s\n", worker_rank, (char*)processed_paragraph_fantasy);
+
+    	//trimite paragraful procesat catre master
+    	//MPI_Send(processed_paragraph_fantasy, strlen(processed_paragraph_horror), MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
 	}
     
  
 	//asteapta ca thread-urile care fac procesarea sa isi incheie treaba, apoi trimite inapoi la master paragraful intreg procesat
+
+
 
 	pthread_exit(NULL);
 }
@@ -603,16 +581,33 @@ int main (int argc, char *argv[]) {
     			exit(-1);
     		}
     	}
-    	//faca receive la paragrafele procesate trimite de catre workeri
+    	//se face receive la paragrafele procesate trimise de catre cele 4 thread-uri care au facut receive in nodurile worker
+    	//for (i = 0; i < 3; i++) {
+    		char *paragraph;
+			MPI_Status recv_status;
+			int buffer_size;
 
-    	//retine in memoria nodului master tot textul procesat, care este scris la final in fisier
+			MPI_Probe(3, 0, MPI_COMM_WORLD, &recv_status);
+			MPI_Get_count(&recv_status, MPI_CHAR, &buffer_size);
 
+			paragraph = (char *)malloc(buffer_size * sizeof(char));
+			MPI_Status actual_status;
+			MPI_Recv(paragraph, buffer_size, MPI_CHAR, 3, 0, MPI_COMM_WORLD, &actual_status);
 
+			printf("PARAGRAFUL PROCESAT CARE A AJUNS LA MASTER de la worker-ul %d este: %s\n", actual_status.MPI_SOURCE, paragraph);
+
+    		//retine in memoria nodului master tot textul procesat, care este scris la final in fisier
+
+			//nodul master va stie la final in fisierul .out textul procesat
+    	//}
+
+    	
     }
     else {
-    	//in fiecare worker este pornit initial thread-ul 'reader' care recepteaza datele trimise de master
+    	//in fiecare worker este pornit initial thread-ul 'reader' care recepteaza datele trimise de master si porneste ulterior threadurile de procesare
         pthread_t reader;
         long worker_rank = (long) rank;
+        //functia de thread reader va prima ca argument rank-ul workerului de catre care acesta este pornita
         int r = pthread_create(&reader, NULL, worker_reader_f, &worker_rank);
 
         void *return_value;
