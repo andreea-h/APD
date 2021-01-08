@@ -1,0 +1,55 @@
+
+[HORROR] Numar de paragrafe asteptate in worker: 2
+[horror] Paragraful ajuns in horror:
+ Aceasta tema pare
+Imposibil de grea si
+Speram ca nu e imposibil sa o facem
+
+[COMEDY] Numar de paragrafe asteptate in worker: 1
+[comedy] Paragraful ajuns in comedy:
+ da, dar e tema 3 si mereu temele 3 au fost usoare
+plus ca e scrisa de Hogea, toate temele lui sunt accesibile
+
+[SCIFI] Numar de paragrafe asteptate in worker: 1[scifi] Paragraful ajuns in scifi:
+ stiti ca tema asta contine si MPI si Pthreads, nu?
+
+[horror] Paragraful ajuns in horror:
+ Da...
+
+[FANTASY] Numar de paragrafe asteptate in worker: 0
+[HORROR] Numar de paragrafe asteptate in worker: 2
+[horror] Paragraful ajuns in horror:
+ Aceasta tema pare
+Imposibil de grea si
+Speram ca nu e imposibil sa o facem
+
+[horror] Paragraful ajuns in horror:
+ Da...
+
+[COMEDY] Numar de paragrafe asteptate in worker: 1
+[comedy] Paragraful ajuns in comedy:
+ da, dar e tema 3 si mereu temele 3 au fost usoare
+plus ca e scrisa de Hogea, toate temele lui sunt accesibile
+
+[SCIFI] Numar de paragrafe asteptate in worker: 1[scifi] Paragraful ajuns in scifi:
+ stiti ca tema asta contine si MPI si Pthreads, nu?
+
+[FANTASY] Numar de paragrafe asteptate in worker: 0
+[HORROR] Numar de paragrafe asteptate in worker: 2
+[horror] Paragraful ajuns in horror:
+ Aceasta tema pare
+Imposibil de grea si
+Speram ca nu e imposibil sa o facem
+
+[COMEDY] Numar de paragrafe asteptate in worker: 1
+[comedy] Paragraful ajuns in comedy:
+ da, dar e tema 3 si mereu temele 3 au fost usoare
+plus ca e scrisa de Hogea, toate temele lui sunt accesibile
+
+[SCIFI] Numar de paragrafe asteptate in worker: 1[scifi] Paragraful ajuns in scifi:
+ stiti ca tema asta contine si MPI si Pthreads, nu?
+
+[horror] Paragraful ajuns in horror:
+ Da...
+
+[FANTASY] Numar de paragrafe asteptate in worker: 0
