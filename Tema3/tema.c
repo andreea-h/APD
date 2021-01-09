@@ -536,7 +536,7 @@ void *worker_data_processing_horror(void *arg) {
 /*functia de thread executata de thread-ul de procesare de pe worker-ul horror*/
 void *worker_data_processing_comedy(void *arg) {
 	char *paragraph = (char*) arg;
-	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
+	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
 
 	char *copy = strdup(paragraph);
 	char *res = strdup(paragraph);
@@ -566,7 +566,7 @@ void *worker_data_processing_comedy(void *arg) {
 void *worker_data_processing_SciFi(void *arg) {
 	//al saptelea cuvant de pe fiecare rand este inversat
 	char *paragraph = (char *) arg;
-	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
+	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
 
 	char *rest = paragraph;
 	//reentrant version of strtok
@@ -578,7 +578,7 @@ void *worker_data_processing_SciFi(void *arg) {
 		//line va reprezenta o linie din paragraf
 		//desparte linia in cuvinte si gaseste al saptelea cuvant de pe linie
 		char *line_copy  = strdup(line);
-		char *copy = line_copy;
+		char *copy = strdup(line_copy);
 		char *word = strtok_r(line_copy, " ", &copy);
 		strcat(processed_paragraph, word);
 		strcat(processed_paragraph, " ");
@@ -588,8 +588,8 @@ void *worker_data_processing_SciFi(void *arg) {
 			count_words++;
 			if (word != NULL) {
 				if (count_words % 7 == 0) {
-					int i, length = strlen(word);
-					char *reverse_word = (char *)malloc(strlen(word) * sizeof(char));
+					int i, length = strlen(word) + 1;
+					char *reverse_word = (char *)malloc((strlen(word) + 1) * sizeof(char));
 					for (i = 0; i < length; i++) {
 						reverse_word[length - i - 1] = word[i];
 					}
@@ -614,7 +614,7 @@ void *worker_data_processing_SciFi(void *arg) {
 /*functia de thread executata de thread-ul de procesare de pe worker-ul horror*/
 void *worker_data_processing_fantasy(void *arg) {
 	char *paragraph = (char *) arg;
-	char *processed_paragraph = (char *)malloc(strlen(paragraph) * sizeof(char));
+	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
 
 	//prima litera a fiecarui cuvant trebuie facuta majuscula
 	char *token = strtok(paragraph, " ");
@@ -622,7 +622,7 @@ void *worker_data_processing_fantasy(void *arg) {
 	int i;
 	while (token != NULL) {
 		ok = false;
-		char *new_token = (char *)malloc(strlen(token) * sizeof(char));
+		char *new_token = (char *)malloc((strlen(token) + 1) * sizeof(char));
 		strcpy(new_token, token);
 		new_token[0] = toupper(new_token[0]);
 		for (i = 1; i < strlen(token); i++) {
@@ -727,12 +727,12 @@ void *worker_horror_reader_f(void *arg) {
 	    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
 	    	exit(-1);
 	    }
-	    printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
+	   // printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
 
 	    
 
 	    //trimite paragraful procesat catre master
-	   // MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);	
+	    MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);	
 	 	//free(processed_paragraph_horror);
 	 	//free(paragraph);
 	 	//paragraph = NULL;
@@ -791,10 +791,10 @@ void *worker_comedy_reader_f(void *arg) {
 	    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", COMEDY_WORKER);
 	    	exit(-1);
 	   	}
-	    printf("Textul procesat in worker-ul COMEDY este:%s\n", (char*)processed_paragraph_comedy);
+	   // printf("Textul procesat in worker-ul COMEDY este:%s\n", (char*)processed_paragraph_comedy);
 
 	    //trimite paragraful procesat catre master
-	   // MPI_Send(processed_paragraph_comedy, strlen(processed_paragraph_comedy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
+	    MPI_Send(processed_paragraph_comedy, strlen(processed_paragraph_comedy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 		//free(processed_paragraph_comedy);			
 	}
 	    
@@ -832,7 +832,7 @@ void *worker_sciFi_reader_f(void *arg) {
 		//printf("sci_fi\n%s\n", paragraph);
 	
 		//int lines_count = get_num_lines(paragraph);
-		//printf("Mesajul primit in worker-ul %ld este: %s; Are %d linii\n", worker_rank, paragraph, lines_count);
+		//printf("Mesajul primit in worker-ul %d este: %s; Are %d linii\n", SCIFI_WORKER, paragraph, lines_count);
 		//numara cate linii contine paragraful primit
 
 		//porneste atatea thread-uri de cat este nevoie pt a procesa paragraful in functie de numarul de linii din paragraf
@@ -852,10 +852,10 @@ void *worker_sciFi_reader_f(void *arg) {
 	    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", SCIFI_WORKER);
 	    	exit(-1);
 	   	}
-	    printf("Textul procesat in worker-ul SCI-FI este:%s\n", (char*)processed_paragraph_sci_fi);
+	   // printf("Textul procesat in worker-ul SCI-FI este:%s\n", (char*)processed_paragraph_sci_fi);
 
 	    //trimite paragraful procesat catre master
-	   // MPI_Send(processed_paragraph_sci_fi, strlen(processed_paragraph_sci_fi) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
+	    MPI_Send(processed_paragraph_sci_fi, strlen(processed_paragraph_sci_fi) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 		//free(processed_paragraph_sci_fi);
 	}
 	    
@@ -903,7 +903,7 @@ void *worker_fantasy_reader_f(void *arg) {
 		//ulterior paragraful procesat conform cu tipul acestuia este trimis catre Master
 		int r;
 		pthread_t processing_thread;
-		r = pthread_create(&processing_thread, NULL, worker_data_processing_SciFi, (void *)paragraph);
+		r = pthread_create(&processing_thread, NULL, worker_data_processing_fantasy, (void *)paragraph);
 		if (check_thread_start(r, FANTASY_WORKER) == false) {
 				exit(-1);
 		}
@@ -914,10 +914,10 @@ void *worker_fantasy_reader_f(void *arg) {
 	    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", FANTASY_WORKER);
 	    	exit(-1);
 	   	}
-	    printf("Textul procesat in worker-ul FANTASY este:%s\n", (char*)processed_paragraph_fantasy);
+	   // printf("Textul procesat in worker-ul FANTASY este:%s\n", (char*)processed_paragraph_fantasy);
 
 	    //trimite paragraful procesat catre master
-	   //MPI_Send(processed_paragraph_fantasy, strlen(processed_paragraph_fantasy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
+	    MPI_Send(processed_paragraph_fantasy, strlen(processed_paragraph_fantasy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 	  // free(processed_paragraph_fantasy);
 	}
 	    
