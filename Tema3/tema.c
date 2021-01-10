@@ -571,7 +571,7 @@ void *worker_data_processing_horror(void *arg) {
 			}
 		}
 	}
-	processed_paragraph = (char *)malloc((strlen(paragraph) + k) * sizeof(char));
+	processed_paragraph = (char *)malloc((strlen(paragraph) + k + 1) * sizeof(char));
 	for (i = 0; i <= strlen(paragraph); i++) {
 		processed_paragraph[strlen(processed_paragraph)] = paragraph[i];
 		if (isLetter(paragraph[i]) == true) {
@@ -582,7 +582,7 @@ void *worker_data_processing_horror(void *arg) {
 			}
 		}
 	}
-	void *result = processed_paragraph;
+	strcat(processed_paragraph, "\n");
 	return processed_paragraph;
 }
 
@@ -611,7 +611,7 @@ void *worker_data_processing_comedy(void *arg) {
 		token = strtok_r(NULL, " \n", &res);
 	}
 
-	void *result = processed_paragraph;
+	strcat(processed_paragraph, "\n");
 	return processed_paragraph;
 }
 
@@ -619,7 +619,7 @@ void *worker_data_processing_comedy(void *arg) {
 void *worker_data_processing_SciFi(void *arg) {
 	//al saptelea cuvant de pe fiecare rand este inversat
 	char *paragraph = (char *) arg;
-	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
+	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 2) * sizeof(char));
 
 	char *rest = paragraph;
 	//reentrant version of strtok
@@ -631,7 +631,7 @@ void *worker_data_processing_SciFi(void *arg) {
 		count_words = 1;
 		//line va reprezenta o linie din paragraf
 		//desparte linia in cuvinte si gaseste al saptelea cuvant de pe linie
-		char *line_copy = (char *)malloc((strlen(line) + 1) * sizeof(char));
+		char *line_copy = (char *)malloc((strlen(line) + 2) * sizeof(char));
 		strcpy(line_copy, line);
 		char *copy = line_copy;
 		char *word = strtok_r(line_copy, " ", &copy);
@@ -669,7 +669,7 @@ void *worker_data_processing_SciFi(void *arg) {
 			strcat(processed_paragraph, "\n");
 		}
 	}
-	strcat(processed_paragraph, "\n");
+	strcat(processed_paragraph, "\n\n");
 
 
 	//void *result = processed_paragraph;
@@ -704,6 +704,7 @@ void *worker_data_processing_fantasy(void *arg) {
 		token = strtok(NULL, " \n");
 	}
 
+	strcat(processed_paragraph, "\n");
 	return processed_paragraph;
 }
 
@@ -1100,6 +1101,10 @@ int main (int argc, char *argv[]) {
     		printf("%d\n", paragraphs_order[i]);
     	}*/
 
+
+    	char *final_text = malloc(1);
+    	*final_text = '\0';
+
     	//primeste paragrafele procesate de la workeri	
     	for (i = 0; i < nr_total_paragraphs; i++) {
     		if (paragraphs_order[i] == 0) { //asteapta un paragraf horror procesat
@@ -1113,7 +1118,20 @@ int main (int argc, char *argv[]) {
 							
 				processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 				MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, HORROR_WORKER, horror_par, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				printf("horror\n%s\n", processed_paragraph);
+				//printf("horror\n%s\n", processed_paragraph);
+
+				char *append_str = (char *)malloc(strlen(processed_paragraph) + strlen("horror\n") + 1);
+				sprintf(append_str, "horror\n%s", processed_paragraph);
+
+				int new_size = strlen(append_str) + strlen(final_text) + 1;
+				char *aux = (char *)realloc(final_text, new_size);
+				if (!aux) {
+					exit(-1);
+				}
+				final_text = aux;
+				strcat(final_text, append_str);
+				
+				//printf("%s", final_text);
 				horror_par++;
     		}
     		else if (paragraphs_order[i] == 1) { //asteapta un paragraf comedy procesat
@@ -1127,7 +1145,20 @@ int main (int argc, char *argv[]) {
 							
 				processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 				MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, COMEDY_WORKER, comedy_par, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				printf("comedy\n%s\n", processed_paragraph);
+				//printf("comedy\n%s\n", processed_paragraph);
+
+				char *append_str = (char *)malloc(strlen(processed_paragraph) + strlen("comedy\n") + 1);
+				sprintf(append_str, "comedy\n%s", processed_paragraph);
+
+				int new_size = strlen(append_str) + strlen(final_text) + 1;
+				char *aux = (char *)realloc(final_text, new_size);
+				if (!aux) {
+					exit(-1);
+				}
+				final_text = aux;
+				strcat(final_text, append_str);
+
+				//printf("%s", final_text);
 				comedy_par++;
     		}
     		else if (paragraphs_order[i] == 2) { //asteapta un paragraf sci-fi procesat
@@ -1141,7 +1172,22 @@ int main (int argc, char *argv[]) {
 							
 				processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 				MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, SCIFI_WORKER, sciFi_par, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				printf("science-fiction\n%s\n", processed_paragraph);
+				//printf("science-fiction\n%s\n", processed_paragraph);
+
+				char *append_str = (char *)malloc(strlen(processed_paragraph) + strlen("science-fiction\n") + 1);
+				sprintf(append_str, "science-fiction\n%s", processed_paragraph);
+
+				int new_size = strlen(append_str) + strlen(final_text) + 1;
+				char *aux = (char *)realloc(final_text, new_size);
+				if (!aux) {
+					exit(-1);
+				}
+				final_text = aux;
+				strcat(final_text, append_str);
+					
+				//strcat(final_text, "\n");
+				
+				//printf("%s", final_text);
 				sciFi_par++;
     		}
     		else if (paragraphs_order[i] == 3) { //asteapta un paragraf fantasy procesat
@@ -1155,11 +1201,24 @@ int main (int argc, char *argv[]) {
 							
 				processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 				MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, FANTASY_WORKER, fantasy_par, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				printf("fantasy\n%s\n", processed_paragraph);
+				
+				
+				char *append_str = (char *)malloc(strlen(processed_paragraph) + strlen("fantasy\n") + 1);
+				sprintf(append_str, "fantasy\n%s", processed_paragraph);
+
+				int new_size = strlen(append_str) + strlen(final_text) + 1;
+				char *aux = (char *)realloc(final_text, new_size);
+				if (!aux) {
+					exit(-1);
+				}
+				final_text = aux;
+				strcat(final_text, append_str);
 				fantasy_par++;
     		}
     	}
-    }
+
+    	printf("%s", final_text);
+	}
     else {
     	//in fiecare worker este pornit initial thread-ul 'reader' care recepteaza datele trimise de master si porneste ulterior threadurile de procesare
         pthread_t reader;
@@ -1189,6 +1248,7 @@ int main (int argc, char *argv[]) {
     	
     }
 
-    MPI_Finalize();    
+    MPI_Finalize();   
+
     
 }
