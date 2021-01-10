@@ -677,60 +677,32 @@ void *worker_data_processing_SciFi(void *arg) {
 	return processed_paragraph;
 }
 
-/*functia de thread executata de thread-ul de procesare de pe worker-ul horror*/
+/*functia de thread executata de thread-ul de procesare de pe worker-ul fantasy*/
 void *worker_data_processing_fantasy(void *arg) {
 	char *paragraph = (char *) arg;
 	char *processed_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
 
+	char *paragraph_copy = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
+	strcpy(paragraph_copy, paragraph);
 	//prima litera a fiecarui cuvant trebuie facuta majuscula
-	char *token = strtok(paragraph, " ");
+	char *token = strtok(paragraph, " \n");
 	bool ok = false;
-	int i;
+	int position = 0;
 	while (token != NULL) {
-		ok = false;
-		char *new_token = (char *)malloc((strlen(token) + 1) * sizeof(char));
-		strcpy(new_token, token);
-		new_token[0] = toupper(new_token[0]);
-		for (i = 1; i < strlen(token); i++) {
-			if (token[i] == '\n') {
-				ok = true;
-				break;
-			}
-		}
-		//separa ultimul cuvant de pe rand si primul cuvant de pe urmatorul rand
-		if (ok == true) {
-			char *dest1 = (char *)malloc(sizeof(char) * i);
-			strncpy(dest1, new_token, i);
-			strcat(processed_paragraph, dest1);
+		token[0] = toupper(token[0]);
+		position += strlen(token);
+		
+		strcat(processed_paragraph, token);
+
+		if (paragraph_copy[position] == '\n') {
 			strcat(processed_paragraph, "\n");
-
-			int j;
-			//este extras primul cuvant de pe linie
-			new_token[i + 1] = toupper(new_token[i + 1]);
-			char *dest2 = (char *)malloc(sizeof(char) * (strlen(token) - i));
-			strcpy(dest2, new_token + i + 1);
-			strcat(processed_paragraph, dest2);
-			if (token[strlen(token)] != '\n') {
-				strcat(processed_paragraph, " ");
-			}	
-
-			token = strtok(NULL, " ");
-			continue;
 		}
-		if (processed_paragraph == NULL) { 
-			strcpy(processed_paragraph, new_token);
-		}
-		else {
-			strcat(processed_paragraph, new_token);
-		}
-		token = strtok(NULL, " ");
-		if (token != NULL && token[strlen(token)] != '\n') {
+		else if(paragraph_copy[position] == ' ') {
 			strcat(processed_paragraph, " ");
 		}
+		position++;
+		token = strtok(NULL, " \n");
 	}
-
-
-	void *result = processed_paragraph;
 
 	return processed_paragraph;
 }
@@ -808,8 +780,8 @@ void *worker_horror_reader_f(void *arg) {
 	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 	 	//free(processed_paragraph_horror);
-	 	//free(paragraph);
-	 	//paragraph = NULL;
+	 	free(paragraph);
+	 	paragraph = NULL;
 		//asteapta ca thread-urile care fac procesarea sa isi incheie treaba, apoi trimite inapoi la master paragraful intreg procesat
 	}
 
@@ -880,7 +852,9 @@ void *worker_comedy_reader_f(void *arg) {
 	//    printf("comedy: %s\n", processed_paragraph_comedy);
 
 	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-		//free(processed_paragraph_comedy);			
+		//free(processed_paragraph_comedy);	
+		free(paragraph);
+	 	paragraph = NULL;		
 	}
 
 	//printf("S-au procesat si trimis toate paragrafele comedy\n");
@@ -957,6 +931,8 @@ void *worker_sciFi_reader_f(void *arg) {
 	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 	    
 		//free(processed_paragraph_sci_fi);
+		free(paragraph);
+	 	paragraph = NULL;
 
 		//printf("Textul procesat in worker-ul SCI-FI este:%s\n", (char*)processed_paragraph_sci_fi);
 	}
@@ -1026,10 +1002,12 @@ void *worker_fantasy_reader_f(void *arg) {
 
 	    MPI_Bsend(processed_paragraph_fantasy, strlen(processed_paragraph_fantasy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 
-	//    printf("fantasy: %s\n", processed_paragraph_fantasy);
+	// printf("fantasy: %s\n", processed_paragraph_fantasy);
 
-	   // MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-	  // free(processed_paragraph_fantasy);
+	// MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+	   //	free(processed_paragraph_fantasy);
+	   	free(paragraph);
+	 	paragraph = NULL;
 	}
 	    
 	//asteapta ca thread-urile care fac procesarea sa isi incheie treaba, apoi trimite inapoi la master paragraful intreg procesat
