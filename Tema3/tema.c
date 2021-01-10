@@ -14,6 +14,7 @@
 #define SCIFI_WORKER 3
 #define FANTASY_WORKER 4
 #define PARAGRAPH_NR 5
+#define MAX_SIZE 500000000
 
 pthread_mutex_t mutex;
 
@@ -139,13 +140,13 @@ void *master_f_horror(void *arg) {
 						//s-a citit un paragraf de tipul horror
 						//printf("[MASTER]Paragraf horror: %s", paragraph);
 			
-						int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+						int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
 
-						MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 						free(paragraph);
 						paragraph = NULL;
@@ -166,12 +167,12 @@ void *master_f_horror(void *arg) {
 				} 
 				else {
 
-					int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+					int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
-					MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 					free(paragraph);
 					paragraph = NULL;
@@ -249,12 +250,13 @@ void *master_f_comedy(void *arg) {
 						check_paragraph_end = true;
 						//s-a citit un paragraf de tipul comedy
 
-						int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+						//int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD * nr_total_paragraphs;
+						int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
-						MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 						free(paragraph);
 						paragraph = NULL;
 						//primeste paragraful procesat de la worker
@@ -274,12 +276,12 @@ void *master_f_comedy(void *arg) {
 				}
 				else {
 
-					int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+					int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
-					MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 					free(paragraph);
 					paragraph = NULL;
 
@@ -356,12 +358,12 @@ void *master_f_scifi(void *arg) {
 						//s-a citit un paragraf de tipul scifi
 						//printf("[MASTER]Paragraf scifi: %s", paragraph);
 					
-						int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+						int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
-						MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 
 						free(paragraph);
@@ -384,12 +386,12 @@ void *master_f_scifi(void *arg) {
 				else {
 					//printf("PARAGRAF scifi:%s", paragraph);
 
-					int buffer_dim = strlen(paragraph) + 1 + MPI_BSEND_OVERHEAD;
+					int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 					char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
-					MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 					free(paragraph);
 					paragraph = NULL;
@@ -466,12 +468,19 @@ void *master_f_fantasy(void *arg) {
 
 						//printf("PARAGRAF FANTASY: %s\n", paragraph);
 						//s-a citit un paragraf de tipul fantasy
-						MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+
+						int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
+						char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
+						MPI_Buffer_attach(buffer_memory, buffer_dim);
+
+						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+
 						free(paragraph);
 						paragraph = NULL;
 
 						//primeste paragraful procesat de la worker
-						char *processed_paragraph;
+					/*	char *processed_paragraph;
 						MPI_Status status;
 						int buffer_size;
 
@@ -481,18 +490,25 @@ void *master_f_fantasy(void *arg) {
 							
 						processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 						MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-						printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);	
+						printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);	*/
 					}
 				}
 				else {
 
 					//printf("PARAGRAF:%s", paragraph);
-					MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+					int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
+					char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
+					MPI_Buffer_attach(buffer_memory, buffer_dim);
+
+					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+
+					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+
 					free(paragraph);
 					paragraph = NULL;
 
 					//primeste paragraful procesat de la worker
-					char *processed_paragraph;
+				/*	char *processed_paragraph;
 					MPI_Status status;
 					int buffer_size;
 
@@ -502,7 +518,7 @@ void *master_f_fantasy(void *arg) {
 							
 					processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 					MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);
+					printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);*/
 
 					break;
 				}
@@ -781,15 +797,15 @@ void *worker_horror_reader_f(void *arg) {
 	   // printf("%s\n", processed_paragraph_horror);
 	    //printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
 	    //trimite paragraful procesat catre master
-	    int buffer_dim = strlen(processed_paragraph_horror) + 1 + MPI_BSEND_OVERHEAD;
+	    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 	    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 	    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 	    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);	
 
-	    printf("horror: %s\n", processed_paragraph_horror);
+	//    printf("horror: %s\n", processed_paragraph_horror);
 
-	 	MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
 	 	//free(processed_paragraph_horror);
 	 	//free(paragraph);
@@ -855,15 +871,15 @@ void *worker_comedy_reader_f(void *arg) {
 	    //printf("Textul procesat in worker-ul COMEDY este:%s\n", (char*)processed_paragraph_comedy);
 
 	    //trimite paragraful procesat catre master
-	    int buffer_dim = strlen(processed_paragraph_comedy) + 1 + MPI_BSEND_OVERHEAD;
+	    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 	    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 	    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 	    MPI_Bsend(processed_paragraph_comedy, strlen(processed_paragraph_comedy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 
-	    printf("comedy: %s\n", processed_paragraph_comedy);
+	//    printf("comedy: %s\n", processed_paragraph_comedy);
 
-	 	MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 		//free(processed_paragraph_comedy);			
 	}
 
@@ -930,15 +946,15 @@ void *worker_sciFi_reader_f(void *arg) {
 	   //	printf("DIMENSIUNE TEXT PROCESAT: %ld\n", strlen(processed_paragraph_sci_fi));
 
 	    //trimite paragraful procesat catre master
-	   	int buffer_dim = strlen(processed_paragraph_sci_fi) + 1 + MPI_BSEND_OVERHEAD;
+	   	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 	    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 	    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 	   	MPI_Bsend(processed_paragraph_sci_fi, strlen(processed_paragraph_sci_fi) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 
-	   	printf("sci-fi: %s\n", processed_paragraph_sci_fi);
+	 //  	printf("sci-fi: %s\n", processed_paragraph_sci_fi);
 
-	 	MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+	 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 	    
 		//free(processed_paragraph_sci_fi);
 
@@ -1004,15 +1020,15 @@ void *worker_fantasy_reader_f(void *arg) {
 
 	    //trimite paragraful procesat catre master
 
-	   	int buffer_dim = strlen(processed_paragraph_fantasy) + 1 + MPI_BSEND_OVERHEAD;
+	   	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
 	   	char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 	    MPI_Buffer_attach(buffer_memory, buffer_dim);
 
 	    MPI_Bsend(processed_paragraph_fantasy, strlen(processed_paragraph_fantasy) + 1, MPI_CHAR, MASTER, i, MPI_COMM_WORLD);
 
-	    printf("fantasy: %s\n", processed_paragraph_fantasy);
+	//    printf("fantasy: %s\n", processed_paragraph_fantasy);
 
-	    MPI_Buffer_detach(&buffer_memory, &buffer_dim);
+	   // MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 	  // free(processed_paragraph_fantasy);
 	}
 	    
@@ -1045,7 +1061,7 @@ int main (int argc, char *argv[]) {
     MPI_Get_processor_name(hostname, &len);
 
     if (rank == MASTER) {
-    	printf("\n");
+    	//printf("\n");
     	
     	//porneste cele 4 threaduri care proceseaza fisierul de intrare
     	pthread_t master_threads[MASTER_THREADS];
@@ -1101,9 +1117,10 @@ int main (int argc, char *argv[]) {
     	int sciFi_par = 0;
     	int fantasy_par = 0;
 
+    	/*
     	for (i = 0; i < nr_total_paragraphs; i++) {
     		printf("%d\n", paragraphs_order[i]);
-    	}
+    	}*/
 
     	//primeste paragrafele procesate de la workeri	
     	for (i = 0; i < nr_total_paragraphs; i++) {
