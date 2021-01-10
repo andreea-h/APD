@@ -155,7 +155,6 @@ void *master_f_horror(void *arg) {
 					/*	char *processed_paragraph;
 						MPI_Status status;
 						int buffer_size;
-
 						MPI_Probe(HORROR_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 							
 						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -182,7 +181,6 @@ void *master_f_horror(void *arg) {
 					/*char *processed_paragraph;
 					MPI_Status status;
 					int buffer_size;
-
 					MPI_Probe(HORROR_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 					
 					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -263,7 +261,6 @@ void *master_f_comedy(void *arg) {
 					/*	char *processed_paragraph;
 						MPI_Status status;
 						int buffer_size;
-
 						MPI_Probe(COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 								
 						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -289,7 +286,6 @@ void *master_f_comedy(void *arg) {
 				/*	char *processed_paragraph;
 					MPI_Status status;
 					int buffer_size;
-
 					MPI_Probe(COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 							
 					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -373,7 +369,6 @@ void *master_f_scifi(void *arg) {
 					/*	char *processed_paragraph;
 						MPI_Status status;
 						int buffer_size;
-
 						MPI_Probe(SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 								
 						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -400,7 +395,6 @@ void *master_f_scifi(void *arg) {
 				/*	char *processed_paragraph;
 					MPI_Status status;
 					int buffer_size;
-
 					MPI_Probe(SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 							
 					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -483,7 +477,6 @@ void *master_f_fantasy(void *arg) {
 					/*	char *processed_paragraph;
 						MPI_Status status;
 						int buffer_size;
-
 						MPI_Probe(FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 								
 						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -511,7 +504,6 @@ void *master_f_fantasy(void *arg) {
 				/*	char *processed_paragraph;
 					MPI_Status status;
 					int buffer_size;
-
 					MPI_Probe(FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 								
 					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
@@ -1101,7 +1093,6 @@ int main (int argc, char *argv[]) {
     		printf("%d\n", paragraphs_order[i]);
     	}*/
 
-
     	char *final_text = malloc(1);
     	*final_text = '\0';
 
@@ -1217,7 +1208,26 @@ int main (int argc, char *argv[]) {
     		}
     	}
 
-    	printf("%s", final_text);
+    	char *out_file;
+    	int length = strlen(file_name);
+    	for(i = 0; i < length; i++) {
+	   		if(file_name[i] == '.') {
+	       		file_name[i]='\0';
+	       		break;
+	   		}
+		}
+		strcat(file_name, ".out");
+
+
+    	FILE *out_fptr = fopen(file_name, "w");
+    	if (out_fptr == NULL) {
+    		printf("Eroare la scrierea in fisier\n");
+    		exit(-1);
+    	}
+
+    	fprintf(out_fptr, "%s", final_text);
+
+    	//printf("%s", final_text);
 	}
     else {
     	//in fiecare worker este pornit initial thread-ul 'reader' care recepteaza datele trimise de master si porneste ulterior threadurile de procesare
