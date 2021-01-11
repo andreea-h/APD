@@ -559,7 +559,9 @@ void *worker_data_processing_horror(void *arg) {
 	char *processed_paragraph;
 	int i;
 	int k = 0; //numarul de consoane gasite in paragraful initial
-	for (i = 0; i < strlen(paragraph); i++) {
+	int size = strlen(paragraph);
+	for (i = 0; i < size; i++) {
+
 		if (isLetter(paragraph[i]) == true) {
 			//verifaca daca litera este consoana
 			if (isVowel(paragraph[i]) == false) {
@@ -567,8 +569,9 @@ void *worker_data_processing_horror(void *arg) {
 			}
 		}
 	}
-	processed_paragraph = (char *)malloc((strlen(paragraph) + k + 1) * sizeof(char));
-	for (i = 0; i <= strlen(paragraph); i++) {
+
+	processed_paragraph = (char *)malloc((size + k + 2) * sizeof(char));
+	for (i = 0; i <= size; i++) {
 		processed_paragraph[strlen(processed_paragraph)] = paragraph[i];
 		if (isLetter(paragraph[i]) == true) {
 			//verifaca daca litera este consoana
@@ -578,7 +581,7 @@ void *worker_data_processing_horror(void *arg) {
 			}
 		}
 	}
-	//strcat(processed_paragraph, "\n");
+	
 	return processed_paragraph;
 }
 
@@ -763,13 +766,13 @@ void *worker_horror_reader_f(void *arg) {
 
 		    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
 
-		    printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
+		    //printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
 		 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 		 	free(paragraph);
 		 	paragraph = NULL;
 		}
 		else {
-			int P = sysconf(_SC_NPROCESSORS_CONF);
+			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
 			printf("Se vor folosit mai multe threaduri pentru procesare\n");
 			//se pornesc maxim P-1 threaduri pentru procesare(o data sau de mai multe ori in functie de numarul de linii)
 			printf("NUMARUL DE LINII: %d\n", lines_count);
@@ -805,7 +808,7 @@ void *worker_horror_reader_f(void *arg) {
 							if (current_line >= start_line && current_line <= end_line) {
 								char *complete_line = (char *)malloc(strlen(line) + 2);
 								sprintf(complete_line, "%s\n", line);
-								int new_size = strlen(complete_line) + 1 + strlen(paragraph_chunk);
+								int new_size = strlen(complete_line) + 2 + strlen(paragraph_chunk);
 								char *aux = (char *)realloc(paragraph_chunk, new_size);
 								if (!aux) {
 									exit(-1);
@@ -822,35 +825,40 @@ void *worker_horror_reader_f(void *arg) {
 							current_line++;
 						}
 						
-						printf("INDEX THREAD: %d\n", thread_index);
+						
+						
 						if (thread_index <= P - 2) {
 							//porneste cele P - 1 threaduri de procesare
-							printf("START_LINE: %d\n", start_line);
-							printf("END_LINE: %d\n", end_line);
-							printf("chunk trimis catre procesare: %s\n", paragraph_chunk);
-							if (threads_num + 1 <= P - 2) {
+							//printf("START_LINE: %d\n", start_line);
+							//printf("END_LINE: %d\n", end_line);
+							//printf("chunk trimis catre procesare: %s\n", paragraph_chunk);
+							if (threads_num + 1 <= P - 1) {
 								threads_num++;
 							}
-							int r = pthread_create(&processing_threads[thread_index], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
+							//printf("INDEX THREAD: %d\n", thread_index);
+							//printf("CHUNCK TRIMIS CATRE PROCESARE: %s\n", paragraph_chunk);
+							char *chunck = (char *)malloc(strlen(paragraph_chunk) + 1);
+							strcpy(chunck, paragraph_chunk);
+							int r = pthread_create(&processing_threads[thread_index], NULL, worker_data_processing_horror, (void *)chunck);
 							if (check_thread_start(r, HORROR_WORKER) == false) {
+								printf("Eroare la pornire thread\n");
 								exit(-1);
 							}
-							free(paragraph_chunk);
-							paragraph_chunk = malloc(1);
-							*paragraph_chunk = '\0';
 							thread_index++;
+							//printf("NUMARUL DE THREADURI PORNITE: %d\n", thread_index);
 						}
 						//se face join pe threadurile de procesare anterior pornite, si se porneste un nou thread 0
-						else {
-							printf("SE AJUNGE LA JOIN PENTRU PRIMELE 7 THREADURI DE PROCESARE\n");
+						if (thread_index > P - 2) {
+							//printf("SE AJUNGE LA JOIN PENTRU CELE %d THREADURI DE PROCESARE\n", threads_num);
 							int i;
 							for (i = 0; i < threads_num; i++) {
 								char *processed_paragraph_horror = NULL;
 						        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph_horror);
-						        if (r) {
+						      	if (r) {
 						            printf("Eroare la asteptarea thread-ului %d\n", i);
 						            exit(-1);
-						        }
+						       	}
+
 						        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph_horror) + 1 + strlen(final_paragraph));
 						        if (!aux) {
 						        	exit(-1);
@@ -858,18 +866,30 @@ void *worker_horror_reader_f(void *arg) {
 						        final_paragraph = aux;
 						        strcat(final_paragraph, processed_paragraph_horror);
 				   		 	}   
+				   		 	
 				   		 	last_lines += chunck_lines;
 				   		 	chunck_lines = 0;
-				   		 	thread_index = 0;
+				   		 	threads_num = 1;
+
+							thread_index = 0;
 						}
+
+						free(paragraph_chunk);
+						paragraph_chunk = malloc(1);
+						*paragraph_chunk = '\0';	
 
 						if (line == NULL) {
 							break;
-						}		
+						}	
 				}
 
 				//trimite paragraful final procesat catre MASTER
-				printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
+				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
+				int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
+			    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
+			    MPI_Buffer_attach(buffer_memory, buffer_dim);
+
+			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 			}
 			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
 			else if (threads_num <= P - 1) {
