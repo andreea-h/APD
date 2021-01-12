@@ -1,4 +1,4 @@
 build:
-	mpicc tema.c -o tema
+	mpicc -g tema.c -o main -lm
 run:
-	mpirun -np 5 -oversubscribe  tema file.in
+	mpirun -np 5 -oversubscribe main file.in
