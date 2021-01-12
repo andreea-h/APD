@@ -1626,7 +1626,6 @@ int main (int argc, char *argv[]) {
 	file_name = strdup(argv[1]);
 
 	
-
 	int numtasks, rank, len;
     char hostname[MPI_MAX_PROCESSOR_NAME];
  
@@ -1829,20 +1828,21 @@ int main (int argc, char *argv[]) {
 
 		fclose(fptr);
 	
-    	
-
-    	char *out_file;
     	int length = strlen(file_name);
+
+    	char *out_file = (char *)malloc(strlen(file_name) + 1);
+    	strcpy(out_file, file_name);
+    	
     	for(i = 0; i < length - 1; i++) {
-	   		if(file_name[i] == '.' && file_name[i + 1] != '/') {
-	       		file_name[i]='\0';
+	   		if(out_file[i] == '.' && out_file[i + 1] != '/') {
+	       		out_file[i]='\0';
 	       		break;
 	   		}
 		}
-		strcat(file_name, ".out");
+		strcat(out_file, ".out");
 		//printf("out_file: %s\n", file_name);
 
-    	FILE *out_fptr = fopen(file_name, "w");
+    	FILE *out_fptr = fopen(out_file, "w");
     	if (out_fptr == NULL) {
     		printf("Eroare la scrierea in fisier\n");
     		exit(-1);
