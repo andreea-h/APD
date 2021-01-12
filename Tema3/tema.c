@@ -143,7 +143,12 @@ void *master_f_horror(void *arg) {
 						strcpy(paragraph, line_buffer);
 					}
 					else {
-						paragraph = (char *)realloc(paragraph, strlen(paragraph) + strlen(line_buffer) + 2);
+						int size = strlen(paragraph) + strlen(line_buffer) + 2;
+						char *paragraph_aux = (char *)realloc(paragraph, size);
+						if (!paragraph_aux) {
+							exit(-1);
+						}
+						paragraph = paragraph_aux;
 						strcat(paragraph, line_buffer);
 					}
 
@@ -251,11 +256,16 @@ void *master_f_comedy(void *arg) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
 					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1) * sizeof(char));
+						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
 						strcpy(paragraph, line_buffer);
 					}
 					else {
-						paragraph = (char *)realloc(paragraph, strlen(paragraph) + strlen(line_buffer) + 2);
+						int size = strlen(paragraph) + strlen(line_buffer) + 2;
+						char *paragraph_aux = (char *)realloc(paragraph, size);
+						if (!paragraph_aux) {
+							exit(-1);
+						}
+						paragraph = paragraph_aux;
 						strcat(paragraph, line_buffer);
 					}
 
@@ -361,7 +371,12 @@ void *master_f_scifi(void *arg) {
 						strcpy(paragraph, line_buffer);
 					}
 					else {
-						paragraph = (char *)realloc(paragraph, strlen(paragraph) + strlen(line_buffer) + 2);
+						int size = strlen(paragraph) + strlen(line_buffer) + 2;
+						char *paragraph_aux = (char *)realloc(paragraph, size);
+						if (!paragraph_aux) {
+							exit(-1);
+						}
+						paragraph = paragraph_aux;
 						strcat(paragraph, line_buffer);
 					}
 
@@ -466,11 +481,16 @@ void *master_f_fantasy(void *arg) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
 					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1) * sizeof(char));
+						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
 						strcpy(paragraph, line_buffer);
 					}
 					else {
-						paragraph = (char *)realloc(paragraph, strlen(paragraph) + strlen(line_buffer) + 2);
+						int size = strlen(paragraph) + strlen(line_buffer) + 2;
+						char *paragraph_aux = (char *)realloc(paragraph, size);
+						if (!paragraph_aux) {
+							exit(-1);
+						}
+						paragraph = paragraph_aux;
 						strcat(paragraph, line_buffer);
 					}
 
@@ -651,7 +671,6 @@ void *worker_data_processing_SciFi(void *arg) {
 		strcat(processed_paragraph, word);
 		strcat(processed_paragraph, " ");
 		while (word != NULL) {
-			
 			word = strtok_r(NULL, " ", &copy);
 			count_words++;
 			if (word != NULL) {
@@ -660,7 +679,7 @@ void *worker_data_processing_SciFi(void *arg) {
 				}
 				if (count_words % 7 == 0) {
 					int i, length = strlen(word) + 1;
-					char *reverse_word = (char *)malloc(length * sizeof(char));
+					char *reverse_word = (char *)malloc((length + 1)* sizeof(char));
 
 					int end = strlen(word) - 1;
 					int begin;
@@ -914,6 +933,8 @@ void *worker_horror_reader_f(void *arg) {
 		MPI_Status status_recv;
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, HORROR_WORKER, MPI_COMM_WORLD, &status_recv);
+
+		//printf("Paragraful care ajunge la worker reader: %s\n", paragraph);
 	
 		int lines_count = get_num_lines(paragraph);
 
@@ -1037,7 +1058,7 @@ void *worker_horror_reader_f(void *arg) {
 					}
 				}
 
-				/*paragraful final procesat care va fi trimis catre master*/
+				//paragraful final procesat care va fi trimis catre master
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
@@ -1096,6 +1117,8 @@ void *worker_comedy_reader_f(void *arg) {
 		MPI_Status status_recv;
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, COMEDY_WORKER, MPI_COMM_WORLD, &status_recv);
+
+		//printf("Paragraful care ajunge la worker coemdy: %s\n", paragraph);
 
 		int lines_count = get_num_lines(paragraph);
 		//printf("Mesajul primit in worker-ul %ld este: %s; Are %d linii\n", worker_rank, paragraph, lines_count);
@@ -1225,7 +1248,7 @@ void *worker_comedy_reader_f(void *arg) {
 					}
 				}
 
-				/*paragraful final procesat care va fi trimis catre master*/
+				//paragraful final procesat care va fi trimis catre master
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
@@ -1286,6 +1309,7 @@ void *worker_sciFi_reader_f(void *arg) {
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, SCIFI_WORKER, MPI_COMM_WORLD, &status_recv);
 
+		//printf("Paragraful care ajunge la worker scifi: %s\n", paragraph);
 
 		int lines_count = get_num_lines(paragraph);
 
@@ -1409,7 +1433,7 @@ void *worker_sciFi_reader_f(void *arg) {
 					}
 				}
 
-				/*paragraful final procesat care va fi trimis catre master*/
+				//paragraful final procesat care va fi trimis catre master
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
@@ -1470,6 +1494,8 @@ void *worker_fantasy_reader_f(void *arg) {
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, FANTASY_WORKER, MPI_COMM_WORLD, &status_recv);
 	
+		//printf("Paragraful care ajunge la worker fantasy: %s\n", paragraph);
+
 		int lines_count = get_num_lines(paragraph);
 		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
 		if (lines_count <= NR_LINES) {
@@ -1593,7 +1619,7 @@ void *worker_fantasy_reader_f(void *arg) {
 					}
 				}
 
-				/*paragraful final procesat care va fi trimis catre master*/
+				//paragraful final procesat care va fi trimis catre master
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
