@@ -921,14 +921,14 @@ void *worker_comedy_reader_f(void *arg) {
 		if (lines_count <= NR_LINES) {
 			int r;
 			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_comedy, (void *)paragraph);
 			if (check_thread_start(r, HORROR_WORKER) == false) {
 				exit(-1);
 			}
-			char *processed_paragraph_horror = NULL;
-		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
+			char *processed_paragraph = NULL;
+		   	r = pthread_join(processing_thread, (void**)&processed_paragraph);
 		    if (r != 0) {
-		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
+		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", COMEDY_WORKER);
 		    	exit(-1);
 		    }
 		   
@@ -944,7 +944,7 @@ void *worker_comedy_reader_f(void *arg) {
 			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
 			
 			if (threads_num > P - 1) {
-				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
+				char *final_paragraph = extract_and_process_chuncks(paragraph, COMEDY_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
 			//    MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
@@ -1010,7 +1010,7 @@ void *worker_comedy_reader_f(void *arg) {
 						current_line++;
 					}
 
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_comedy, (void *)paragraph_chunk);
 					if (check_thread_start(r, HORROR_WORKER) == false) {
 						exit(-1);
 					}
@@ -1023,19 +1023,19 @@ void *worker_comedy_reader_f(void *arg) {
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
-					char *processed_paragraph_horror = NULL;
-			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph_horror);
+					char *processed_paragraph = NULL;
+			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph);
 			        if (r) {
 			            printf("Eroare la asteptarea thread-ului %d\n", i);
 			            exit(-1);
 			        }
 			       // printf("Chunck procesat: %s\n", processed_paragraph_horror);
-			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph_horror) + 1 + strlen(final_paragraph));
+			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph) + 1 + strlen(final_paragraph));
 			        if (!aux) {
 			        	exit(-1);
 			        }
 			        final_paragraph = aux;
-			        strcat(final_paragraph, processed_paragraph_horror);
+			        strcat(final_paragraph, processed_paragraph);
 	   		 	}   
 		  
 			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
@@ -1112,18 +1112,18 @@ void *worker_sciFi_reader_f(void *arg) {
 		if (lines_count <= NR_LINES) {
 			int r;
 			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_SciFi, (void *)paragraph);
 			if (check_thread_start(r, HORROR_WORKER) == false) {
 				exit(-1);
 			}
-			char *processed_paragraph_horror = NULL;
-		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
+			char *processed_paragraph = NULL;
+		   	r = pthread_join(processing_thread, (void**)&processed_paragraph);
 		    if (r != 0) {
 		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
 		    	exit(-1);
 		    }
 		 
-		  //  MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
+		  //  MPI_Send(processed_paragraph, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
 
 		 //   printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
 		}
@@ -1139,7 +1139,7 @@ void *worker_sciFi_reader_f(void *arg) {
 			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
 			
 			if (threads_num > P - 1) {
-				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
+				char *final_paragraph = extract_and_process_chuncks(paragraph, SCIFI_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
 				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
@@ -1208,7 +1208,7 @@ void *worker_sciFi_reader_f(void *arg) {
 						current_line++;
 					}
 
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_SciFi, (void *)paragraph_chunk);
 					if (check_thread_start(r, HORROR_WORKER) == false) {
 						exit(-1);
 					}
@@ -1221,19 +1221,19 @@ void *worker_sciFi_reader_f(void *arg) {
 				char *final_paragraph = malloc(1);
 				*final_paragraph = '\0';
 				for (i = 0; i < threads_num; i++) {
-					char *processed_paragraph_horror = NULL;
-			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph_horror);
+					char *processed_paragraph = NULL;
+			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph);
 			        if (r) {
 			            printf("Eroare la asteptarea thread-ului %d\n", i);
 			            exit(-1);
 			        }
 			       // printf("Chunck procesat: %s\n", processed_paragraph_horror);
-			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph_horror) + 1 + strlen(final_paragraph));
+			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph) + 1 + strlen(final_paragraph));
 			        if (!aux) {
 			        	exit(-1);
 			        }
 			        final_paragraph = aux;
-			        strcat(final_paragraph, processed_paragraph_horror);
+			        strcat(final_paragraph, processed_paragraph);
 	   		 	}   
 		   
 			    //	MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
@@ -1309,14 +1309,14 @@ void *worker_fantasy_reader_f(void *arg) {
 		if (lines_count <= NR_LINES) {
 			int r;
 			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
-			if (check_thread_start(r, HORROR_WORKER) == false) {
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_fantasy, (void *)paragraph);
+			if (check_thread_start(r, FANTASY_WORKER) == false) {
 				exit(-1);
 			}
 			char *processed_paragraph_horror = NULL;
 		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
 		    if (r != 0) {
-		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
+		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", FANTASY_WORKER);
 		    	exit(-1);
 		    }
 	
@@ -1324,6 +1324,7 @@ void *worker_fantasy_reader_f(void *arg) {
 		}
 		else {
 			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
+			//printf("NR THREADURI : %d\n", P);
 			//printf("Se vor folosit mai multe threaduri pentru procesare\n");
 			//se pornesc maxim P-1 threaduri pentru procesare(o data sau de mai multe ori in functie de numarul de linii)
 			//printf("NUMARUL DE LINII: %d\n", lines_count);
@@ -1334,7 +1335,7 @@ void *worker_fantasy_reader_f(void *arg) {
 			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
 			
 			if (threads_num > P - 1) {
-				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
+				char *final_paragraph = extract_and_process_chuncks(paragraph, FANTASY_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
 			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
@@ -1401,7 +1402,7 @@ void *worker_fantasy_reader_f(void *arg) {
 						current_line++;
 					}
 
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_fantasy, (void *)paragraph_chunk);
 					if (check_thread_start(r, HORROR_WORKER) == false) {
 						exit(-1);
 					}
