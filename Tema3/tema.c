@@ -47,55 +47,35 @@ void *master_f_horror(void *arg) {
 	char *line_buffer;
 	size_t buffer_size; //dimeniunea liniei(incluzand\n)
 	ssize_t result;
-	char *paragraph = NULL;
+	
 	bool check_paragraph_end = false;
-
-	//pthread_barrier_wait(&barrier);
-	//trimite numarul de paragrafe catre workerul aferent tipului de paragraf
-	//MPI_Send(&nr_paragraphs_horror, 1, MPI_INT, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
-
-	//reseteaza fptr la inceputul fisierului
-	//fseek(fptr, 0, SEEK_SET);
 
 	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
 		if (strcmp(line_buffer, "horror\n") == 0) {
+			char *paragraph = malloc(1);
+			*paragraph = '\0';
 			//citeste continutul paragrafului si trimite-l catre workerul 1
 			while (check_paragraph_end == false) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
-					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
-						strcpy(paragraph, line_buffer);
+					
+					int size = strlen(paragraph) + strlen(line_buffer) + 2;
+					char *paragraph_aux = (char *)realloc(paragraph, size);
+					if (!paragraph_aux) {
+						exit(-1);
 					}
-					else {
-						int size = strlen(paragraph) + strlen(line_buffer) + 2;
-						char *paragraph_aux = (char *)realloc(paragraph, size);
-						if (!paragraph_aux) {
-							exit(-1);
-						}
-						paragraph = paragraph_aux;
-						strcat(paragraph, line_buffer);
-					}
-
-
+					paragraph = paragraph_aux;
+					strcat(paragraph, line_buffer);
+					
 					//este identificat finalul paragrafului
 					if (paragraph[strlen(paragraph) - 2] == '\n') {
 						paragraph[strlen(paragraph) - 1] = '\0';
 						check_paragraph_end = true;
 						//s-a citit un paragraf de tipul horror
 						//printf("[MASTER]Paragraf horror: %s", paragraph);
-			
-						//int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-					   // char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-					   // MPI_Buffer_attach(buffer_memory, buffer_dim);
-						//MPI_Request request = MPI_REQUEST_NULL;
-						//printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
+	
 
-						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-
-						free(paragraph);
-						paragraph = NULL;
+						MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
 
 						//primeste paragraful procesat de la worker
 					/*	char *processed_paragraph;
@@ -112,18 +92,10 @@ void *master_f_horror(void *arg) {
 				} 
 				else {
 
-					//int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-					//char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-					//MPI_Buffer_attach(buffer_memory, buffer_dim);
-				//	MPI_Request request = MPI_REQUEST_NULL;
-
-				//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
+					MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
 					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
 
-					free(paragraph);
-					paragraph = NULL;
-
+					
 					//primeste paragraful procesat de la worker
 					//primeste paragraful procesat de la worker
 				/*	char *processed_paragraph;
@@ -149,9 +121,7 @@ void *master_f_horror(void *arg) {
 	
 	//trimite un mesaj care anunta ca s-au trimis toate paragrafele de tipul horror
 	char *message = strdup("DONE");
-	//MPI_Request request = MPI_REQUEST_NULL;
-
-	MPI_Bsend(message, strlen(message) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
+	MPI_Send(message, strlen(message) + 1, MPI_CHAR, HORROR_WORKER, HORROR_WORKER, MPI_COMM_WORLD);
 	//printf("DONE A FOST TRIMIS DIN MASTER HORROR\n");
 	fclose(fptr);
 	pthread_exit(NULL);
@@ -167,41 +137,25 @@ void *master_f_comedy(void *arg) {
 	char *line_buffer;
 	size_t buffer_size; //dimeniunea liniei(inluzand\n)
 	ssize_t result;
-	char *paragraph = NULL;
+	
 	bool check_paragraph_end = false;
 
-	/*int nr_paragraphs = 0;
 	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
 		if (strcmp(line_buffer, "comedy\n") == 0) {
-			nr_paragraphs_comedy++;
-		}
-	}*/
-	//pthread_barrier_wait(&barrier);
-	//MPI_Send(&nr_paragraphs_comedy, 1, MPI_INT, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
-
-
-	//reseteaza fptr la inceputul fisierului
-	//fseek(fptr, 0, SEEK_SET);
-
-	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
-		if (strcmp(line_buffer, "comedy\n") == 0) {
+			char *paragraph = malloc(1);
+			*paragraph = '\0';
 			//citeste continutul paragrafului si trimite-l catre workerul 1
 			while (check_paragraph_end == false) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
-					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
-						strcpy(paragraph, line_buffer);
+
+					int size = strlen(paragraph) + strlen(line_buffer) + 2;
+					char *paragraph_aux = (char *)realloc(paragraph, size);
+					if (!paragraph_aux) {
+						exit(-1);
 					}
-					else {
-						int size = strlen(paragraph) + strlen(line_buffer) + 2;
-						char *paragraph_aux = (char *)realloc(paragraph, size);
-						if (!paragraph_aux) {
-							exit(-1);
-						}
-						paragraph = paragraph_aux;
-						strcat(paragraph, line_buffer);
-					}
+					paragraph = paragraph_aux;
+					strcat(paragraph, line_buffer);
 
 					if (paragraph[strlen(paragraph) - 2] == '\n') {
 						paragraph[strlen(paragraph) - 1] = '\0';
@@ -213,24 +167,8 @@ void *master_f_comedy(void *arg) {
 					   // char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					   // MPI_Buffer_attach(buffer_memory, buffer_dim);
 
-						//MPI_Request request = MPI_REQUEST_NULL;
-
-					//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
+						MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
 						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-						free(paragraph);
-						paragraph = NULL;
-						//primeste paragraful procesat de la worker
-					/*	char *processed_paragraph;
-						MPI_Status status;
-						int buffer_size;
-						MPI_Probe(COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-								
-						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-							
-						processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-						MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-						//printf("[COMEDY-MASTER]\n%s\n", processed_paragraph);
 					}
 
 				}
@@ -240,24 +178,8 @@ void *master_f_comedy(void *arg) {
 				//	char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
 					//MPI_Buffer_attach(buffer_memory, buffer_dim);
 
-					//MPI_Request request = MPI_REQUEST_NULL;
-				//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
-					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-					free(paragraph);
-					paragraph = NULL;
-
-					//primeste paragraful procesat de la worker
-				/*	char *processed_paragraph;
-					MPI_Status status;
-					int buffer_size;
-					MPI_Probe(COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-							
-					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-						
-					processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-					MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, COMEDY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-					//printf("[COMEDY-MASTER]\n%s\n", processed_paragraph);
+					MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
+				
 
 					break;
 				}
@@ -269,9 +191,8 @@ void *master_f_comedy(void *arg) {
 	}
 
 	//trimite un mesaj care anunta ca s-au trimis toate paragrafele de tipul horror
-	//MPI_Request request = MPI_REQUEST_NULL;
 	char *message = strdup("DONE");
-	MPI_Bsend(message, strlen(message) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
+	MPI_Send(message, strlen(message) + 1, MPI_CHAR, COMEDY_WORKER, COMEDY_WORKER, MPI_COMM_WORLD);
 	//printf("DONE A FOST TRIMIS DIN MASTER COMEDY\n");
 	fclose(fptr);
 	pthread_exit(NULL);
@@ -287,102 +208,41 @@ void *master_f_scifi(void *arg) {
 	char *line_buffer;
 	size_t buffer_size; //dimeniunea liniei(inluzand\n)
 	ssize_t result;
-	char *paragraph = NULL;
+	
 	bool check_paragraph_end = false;
 
-	/*int nr_paragraphs = 0;
 	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
 		if (strcmp(line_buffer, "science-fiction\n") == 0) {
-			nr_paragraphs++;
-		}
-	}*/
-	//pthread_barrier_wait(&barrier);
-	//MPI_Send(&nr_paragraphs_sci_fi, 1, MPI_INT, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
 
-	//reseteaza fptr la inceputul fisierului
-	//fseek(fptr, 0, SEEK_SET);
+			char *paragraph = malloc(1);
+			*paragraph = '\0';
 
-	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
-		if (strcmp(line_buffer, "science-fiction\n") == 0) {
 			//citeste continutul paragrafului si trimite-l catre workerul 1
 			while (check_paragraph_end == false) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
-					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
-						strcpy(paragraph, line_buffer);
+
+					int size = strlen(paragraph) + strlen(line_buffer) + 2;
+					char *paragraph_aux = (char *)realloc(paragraph, size);
+					if (!paragraph_aux) {
+						exit(-1);
 					}
-					else {
-						int size = strlen(paragraph) + strlen(line_buffer) + 2;
-						char *paragraph_aux = (char *)realloc(paragraph, size);
-						if (!paragraph_aux) {
-							exit(-1);
-						}
-						paragraph = paragraph_aux;
-						strcat(paragraph, line_buffer);
-					}
+					paragraph = paragraph_aux;
+					strcat(paragraph, line_buffer);
 
 					if (paragraph[strlen(paragraph) - 2] == '\n') {
 						paragraph[strlen(paragraph) - 1] = '\0';
 						check_paragraph_end = true;
-						//s-a citit un paragraf de tipul scifi
-						//printf("[MASTER]Paragraf scifi: %s", paragraph);
-					
-					//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-					  //  char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-					 //   MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-					//	MPI_Request request = MPI_REQUEST_NULL;
-
-					//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
-						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-
-
-						free(paragraph);
-						paragraph = NULL;
-
-						//primeste paragraful procesat de la worker
-					/*	char *processed_paragraph;
-						MPI_Status status;
-						int buffer_size;
-						MPI_Probe(SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-								
-						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-							
-						processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-						MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-						//printf("[SCI-FI MASTER]\n%s\n", processed_paragraph);
+	
+						MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
+						
 					}
 				}
 				else {
-					//printf("PARAGRAF scifi:%s", paragraph);
+					
 
-					//int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-					//char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-					//MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-					//MPI_Request request = MPI_REQUEST_NULL;
-
-				//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
-					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-
-					free(paragraph);
-					paragraph = NULL;
-
-					//primeste paragraful procesat de la worker
-				/*	char *processed_paragraph;
-					MPI_Status status;
-					int buffer_size;
-					MPI_Probe(SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-							
-					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-						
-					processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-					MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, SCIFI_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-					//printf("[SCI-FI MASTER]\n%s\n", processed_paragraph);
-
+					MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+			
 					break;
 				}
 			}
@@ -394,8 +254,7 @@ void *master_f_scifi(void *arg) {
 	
 	//trimite un mesaj care anunta ca s-au trimis toate paragrafele de tipul horror
 	char *message = strdup("DONE");
-	//MPI_Request request = MPI_REQUEST_NULL;
-	MPI_Bsend(message, strlen(message) + 1, MPI_CHAR, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
+	MPI_Send(message, strlen(message) + 1, MPI_CHAR, SCIFI_WORKER, SCIFI_WORKER, MPI_COMM_WORLD);
 	
 	//printf("DONE A FOST TRIMIS DIN MASTER SCIFI\n");
 	fclose(fptr);
@@ -412,102 +271,38 @@ void *master_f_fantasy(void *arg) {
 	char *line_buffer;
 	size_t buffer_size; //dimeniunea liniei(inluzand\n)
 	ssize_t result;
-	char *paragraph = NULL;
+	
 	bool check_paragraph_end = false;
 
-	/*int nr_paragraphs = 0;
 	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
 		if (strcmp(line_buffer, "fantasy\n") == 0) {
-			nr_paragraphs++;
-		}
-	}*/
-	//pthread_barrier_wait(&barrier);
-	//MPI_Send(&nr_paragraphs_fantasy, 1, MPI_INT, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
 
-	//reseteaza fptr la inceputul fisierului
-	//fseek(fptr, 0, SEEK_SET);
-
-
-	while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
-		if (strcmp(line_buffer, "fantasy\n") == 0) {
+			char *paragraph = malloc(1);
+			*paragraph = '\0';
 			//citeste continutul paragrafului si trimite-l catre workerul 1
 			while (check_paragraph_end == false) {
 				result = getline(&line_buffer, &buffer_size, fptr);
 				if (result != -1) {
-					if (paragraph == NULL) {
-						paragraph = (char *)malloc((strlen(line_buffer) + 1)* sizeof(char));
-						strcpy(paragraph, line_buffer);
+					
+					int size = strlen(paragraph) + strlen(line_buffer) + 2;
+					char *paragraph_aux = (char *)realloc(paragraph, size);
+					if (!paragraph_aux) {
+						exit(-1);
 					}
-					else {
-						int size = strlen(paragraph) + strlen(line_buffer) + 2;
-						char *paragraph_aux = (char *)realloc(paragraph, size);
-						if (!paragraph_aux) {
-							exit(-1);
-						}
-						paragraph = paragraph_aux;
-						strcat(paragraph, line_buffer);
-					}
+					paragraph = paragraph_aux;
+					strcat(paragraph, line_buffer);
 
 					if (paragraph[strlen(paragraph) - 2] == '\n') {
 						paragraph[strlen(paragraph) - 1] = '\0';
 						check_paragraph_end = true;
 
-						//printf("PARAGRAF FANTASY: %s\n", paragraph);
-						//s-a citit un paragraf de tipul fantasy
-
-					//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-					//	char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-					//	MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-						//MPI_Request request = MPI_REQUEST_NULL;
-					//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-						MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
-						//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-
-						free(paragraph);
-						paragraph = NULL;
-
-						//primeste paragraful procesat de la worker
-					/*	char *processed_paragraph;
-						MPI_Status status;
-						int buffer_size;
-						MPI_Probe(FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-								
-						MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-							
-						processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-						MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-						//printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);	
+						MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+					
 					}
 				}
 				else {
 
-					//printf("PARAGRAF:%s", paragraph);
-				//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-				//	char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-				//	MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-				//	MPI_Request request = MPI_REQUEST_NULL;
-				//	printf("Dimensiune paragraf trimis: %ld\n", strlen(paragraph));
-					MPI_Bsend(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
-
-					//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-
-					free(paragraph);
-					paragraph = NULL;
-
-					//primeste paragraful procesat de la worker
-				/*	char *processed_paragraph;
-					MPI_Status status;
-					int buffer_size;
-					MPI_Probe(FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-								
-					MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-							
-					processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
-					MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, FANTASY_WORKER, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);*/
-					//printf("[FANTASY-MASTER]\n%s\n", processed_paragraph);
-
+					MPI_Send(paragraph, strlen(paragraph) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
 					break;
 				}
 			}
@@ -519,8 +314,7 @@ void *master_f_fantasy(void *arg) {
 
 	//trimite un mesaj care anunta ca s-au trimis toate paragrafele de tipul horror
 	char *message = strdup("DONE");
-	//MPI_Request request = MPI_REQUEST_NULL;
-	MPI_Bsend(message, strlen(message) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
+	MPI_Send(message, strlen(message) + 1, MPI_CHAR, FANTASY_WORKER, FANTASY_WORKER, MPI_COMM_WORLD);
 
 	//printf("DONE A FOST TRIMIS DIN MASTER FANTASY\n");
 	fclose(fptr);
@@ -567,7 +361,7 @@ void *worker_data_processing_horror(void *arg) {
 		}
 	}
 
-	processed_paragraph = (char *)malloc((size + k + 2) * sizeof(char));
+	processed_paragraph = (char *)malloc((size + k + 1) * sizeof(char));
 	for (i = 0; i <= size; i++) {
 		processed_paragraph[strlen(processed_paragraph)] = paragraph[i];
 		if (isLetter(paragraph[i]) == true) {
@@ -871,7 +665,6 @@ char *extract_and_process_chuncks(char *paragraph, int worker, int lines_count) 
 	return final_paragraph;
 }
 
-
 /*functia de thread executata de thread-ul reader din worker-ul horror*/
 void *worker_horror_reader_f(void *arg) {
 	/*in thread-ul receiver de pe fiecare worker este primit mai intai de la master numarul de paragrafe 
@@ -901,14 +694,12 @@ void *worker_horror_reader_f(void *arg) {
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, HORROR_WORKER, MPI_COMM_WORLD, &status_recv);
 			
 		if (strcmp(paragraph, "DONE") == 0) {
-			//printf("A ajuns done in horror\n");
 			break;
 		}
 		if (nr == 0) {
 			paragraphs = (char **)malloc(sizeof(char *));
 			paragraphs[0] = (char *)malloc(buffer_size * sizeof(char));
 			strcpy(paragraphs[0], paragraph);
-			printf("first value: %s\n", paragraphs[0]);
 		}
 		else {
 
@@ -919,19 +710,16 @@ void *worker_horror_reader_f(void *arg) {
 			paragraphs = aux;
 			paragraphs[nr] = (char *)malloc(buffer_size * sizeof(char));
 			strcpy(paragraphs[nr], paragraph);
-			printf("second value...: %s\n", paragraphs[nr]);
 		}
 		nr++;
 		free(paragraph);
 		paragraph = NULL;
 	}
-		
+	
 	for (index = 0; index < nr; index++) {
 		char *paragraph = (char *)malloc(strlen(paragraphs[index]) + 1);
-
-
 		strcpy(paragraph, paragraphs[index]);
-		printf("text procesat: %s\n", paragraph);
+		//printf("!!!!!!!!!!!!!!!!!!!!!text cate trebuie procesat: %s\n", paragraph);
 		int lines_count = get_num_lines(paragraph);
 		//printf("Paragraful care ajunge la worker reader: %s\n", paragraph);
 		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
@@ -951,17 +739,8 @@ void *worker_horror_reader_f(void *arg) {
 		   
 		    
 		    //trimite paragraful procesat catre master
-		//    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-		//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-		//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-		    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
-
-		    printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
-		 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-		 	//free(paragraph);
-		 	//paragraph = NULL;
-		 	//index++;
+			//printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
+		   // MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
 		}
 		else {
 			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
@@ -978,11 +757,8 @@ void *worker_horror_reader_f(void *arg) {
 				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
-				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
-				
-
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			   // index++;
+				//printf("Textul procesat in worker-ul HORROR este:%s", final_paragraph);
+			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 			}
 			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
 			else if (threads_num <= P - 1) {
@@ -1072,16 +848,9 @@ void *worker_horror_reader_f(void *arg) {
 			        final_paragraph = aux;
 			        strcat(final_paragraph, processed_paragraph_horror);
 	   		 	}   
-		   	//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			 //   MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-			    	MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-
-			   // printf("!!!!!!!!!!!!!!!!!!!!Paragaraful final procesat: %s\n", final_paragraph);
-			   // free(paragraph);
-		 		//paragraph = NULL;
-		 		//index++;
+		  
+		  		//printf("Textul procesat in worker-ul HORROR este:%s\n", final_paragraph);
+			//    MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 			}
 		}
 	}
@@ -1095,73 +864,75 @@ void *worker_comedy_reader_f(void *arg) {
 	
 	/*in thread-ul receiver de pe fiecare worker este primit mai intai de la master numarul de paragrafe 
 	de tipul asociat lui pe care urmeaza sa le primeasca de la master*/
-	//int num_paragraphs;
-	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, COMEDY_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	//printf("[COMEDY] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
 
+	//int num_paragraphs;
+	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, HORROR_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	//printf("[HORROR] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
+	char **paragraphs = NULL;
 	int index = 0;
+	int nr = 0;
 	while(1) {
 	//for (index = 0; index < num_paragraphs; index++) {
 		//analizeaza numarul de linii din fiecare paragraf si porneste threadurile care fac procesarea paragrafului curent i
-				//face receive la paragraful care i-a fost trimis de catre thread-ul aferent tipului sau din master
+		//face receive la paragraful care i-a fost trimis de catre thread-ul aferent tipului sau din master
 		char *paragraph;
 		MPI_Status status;
 		int buffer_size;
-
 		MPI_Probe(MASTER, COMEDY_WORKER, MPI_COMM_WORLD, &status);
 			
 		MPI_Get_count(&status, MPI_CHAR, &buffer_size);
 		
 		MPI_Status status_recv;
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
+
 		MPI_Request request = MPI_REQUEST_NULL;
 		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, COMEDY_WORKER, MPI_COMM_WORLD, &status_recv);
-	
-
-		//printf("Paragraful care ajunge la worker coemdy: %s\n", paragraph);
-		if (strlen(paragraph) == 4) {
-			if (strcmp(paragraph, "DONE") == 0) {
-			//printf("A ajuns done in comedy\n");
-				break;
-			}
+			
+		if (strcmp(paragraph, "DONE") == 0) {
+			//printf("A ajuns done in horror\n");
+			break;
 		}
+		if (nr == 0) {
+			paragraphs = (char **)malloc(sizeof(char *));
+			paragraphs[0] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[0], paragraph);
+		}
+		else {
+
+			char **aux = (char **)realloc(paragraphs, sizeof(char *) * (nr + 1));
+			if (!aux) {
+				exit(-1);
+			}
+			paragraphs = aux;
+			paragraphs[nr] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[nr], paragraph);
+		}
+		nr++;
+		free(paragraph);
+		paragraph = NULL;
+	}
 		
-
+	for (index = 0; index < nr; index++) {
+		char *paragraph = (char *)malloc(strlen(paragraphs[index]) + 1);
+		strcpy(paragraph, paragraphs[index]);
 		int lines_count = get_num_lines(paragraph);
-		//printf("Mesajul primit in worker-ul %ld este: %s; Are %d linii\n", worker_rank, paragraph, lines_count);
-		//numara cate linii contine paragraful primit
-
-		//porneste atatea thread-uri de cat este nevoie pt a procesa paragraful in functie de numarul de linii din paragraf
-
-		//valoarea intoarsa la join reprezinta paragraful procesat conform cu tipul acestuia
-		//ulterior paragraful procesat conform cu tipul acestuia este trimis catre Master
+		//printf("Paragraful care ajunge la worker reader: %s\n", paragraph);
 		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
 		if (lines_count <= NR_LINES) {
 			int r;
 			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_comedy, (void *)paragraph);
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
 			if (check_thread_start(r, HORROR_WORKER) == false) {
 				exit(-1);
 			}
 			char *processed_paragraph_horror = NULL;
 		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
 		    if (r != 0) {
-		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", COMEDY_WORKER);
+		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
 		    	exit(-1);
 		    }
 		   
-		    
-		    //trimite paragraful procesat catre master
-		 //   int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-		 //   char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-		//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-		    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
-		    index++;
-		    //printf("Textul procesat in worker-ul COMEDY este:%s\n", (char*)processed_paragraph_horror);
-		 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-		 	free(paragraph);
-		 	paragraph = NULL;
+		  //  MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
 		}
 		else {
 			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
@@ -1169,22 +940,14 @@ void *worker_comedy_reader_f(void *arg) {
 			//se pornesc maxim P-1 threaduri pentru procesare(o data sau de mai multe ori in functie de numarul de linii)
 			//printf("NUMARUL DE LINII: %d\n", lines_count);
 			int threads_num = lines_count / NR_LINES + ceil((lines_count % NR_LINES) / (float)NR_LINES); //numarul de thread-uri de care ar fi nevoie pt a imparti procesarea liniilor
-			//printf("numarul de threaduri de care avem nevoie este: %d\n", threads_num);
-			//printf("numar disponibile: %d\n", P - 1);
-
+			
 			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
 			
 			if (threads_num > P - 1) {
-				char *final_paragraph = extract_and_process_chuncks(paragraph, COMEDY_WORKER, lines_count);
+				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
-				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
-			//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			 //   char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
+			//    MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 			}
 			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
 			else if (threads_num <= P - 1) {
@@ -1247,7 +1010,7 @@ void *worker_comedy_reader_f(void *arg) {
 						current_line++;
 					}
 
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_comedy, (void *)paragraph_chunk);
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
 					if (check_thread_start(r, HORROR_WORKER) == false) {
 						exit(-1);
 					}
@@ -1274,15 +1037,9 @@ void *worker_comedy_reader_f(void *arg) {
 			        final_paragraph = aux;
 			        strcat(final_paragraph, processed_paragraph_horror);
 	   		 	}   
-		   	//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			//    MPI_Buffer_attach(buffer_memory, buffer_dim);
+		  
+			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
-			   // printf("!!!!!!!!!!!!!!!!!!!!Paragaraful final procesat comedy: %s\n", final_paragraph);
-			    free(paragraph);
-		 		paragraph = NULL;
 			}
 		}
 	}
@@ -1297,202 +1054,13 @@ void *worker_sciFi_reader_f(void *arg) {
 	
 	/*in thread-ul receiver de pe fiecare worker este primit mai intai de la master numarul de paragrafe 
 	de tipul asociat lui pe care urmeaza sa le primeasca de la master*/
+
 	//int num_paragraphs;
-	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, SCIFI_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	//printf("[SCIFI] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
-
+	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, HORROR_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	//printf("[HORROR] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
+	char **paragraphs = NULL;
 	int index = 0;
-	while(1) {
-	//for (index = 0; index < num_paragraphs; index++) {
-		//analizeaza numarul de linii din fiecare paragraf si porneste threadurile care fac procesarea paragrafului curent i
-				//face receive la paragraful care i-a fost trimis de catre thread-ul aferent tipului sau din master
-		char *paragraph;
-		MPI_Status status;
-		int buffer_size;
-
-		MPI_Probe(MASTER, SCIFI_WORKER, MPI_COMM_WORLD, &status);
-			
-		MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-		
-		MPI_Status status_recv;
-		paragraph = (char *)malloc(buffer_size * sizeof(char));
-		MPI_Request request = MPI_REQUEST_NULL;
-		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, SCIFI_WORKER, MPI_COMM_WORLD, &status_recv);
-
-		//printf("Paragraful care ajunge la worker scifi: %s\n", paragraph);
-		if (strcmp(paragraph, "DONE") == 0) {
-			//printf("A ajuns done in scifi\n");
-			break;
-		}
-		int lines_count = get_num_lines(paragraph);
-
-		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
-		if (lines_count <= NR_LINES) {
-			int r;
-			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_SciFi, (void *)paragraph);
-			if (check_thread_start(r, HORROR_WORKER) == false) {
-				exit(-1);
-			}
-			char *processed_paragraph_horror = NULL;
-		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
-		    if (r != 0) {
-		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", SCIFI_WORKER);
-		    	exit(-1);
-		    }
-		   
-		    
-		    //trimite paragraful procesat catre master
-		//    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-		//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-		//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-		    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
-		    index++;
-		    //printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
-		 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-		 	free(paragraph);
-		 	paragraph = NULL;
-		}
-		else {
-			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
-			//printf("Se vor folosit mai multe threaduri pentru procesare\n");
-			//se pornesc maxim P-1 threaduri pentru procesare(o data sau de mai multe ori in functie de numarul de linii)
-			//printf("NUMARUL DE LINII: %d\n", lines_count);
-			int threads_num = lines_count / NR_LINES + ceil((lines_count % NR_LINES) / (float)NR_LINES); //numarul de thread-uri de care ar fi nevoie pt a imparti procesarea liniilor
-			//printf("numarul de threaduri de care avem nevoie este: %d\n", threads_num);
-			//printf("numar disponibile: %d\n", P - 1);
-
-			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
-			
-			if (threads_num > P - 1) {
-				char *final_paragraph = extract_and_process_chuncks(paragraph, SCIFI_WORKER, lines_count);
-
-				//trimite paragraful final procesat catre MASTER
-				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
-			//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			 //   char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
-			}
-			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
-			else if (threads_num <= P - 1) {
-				
-				pthread_t processing_threads[threads_num]; //fiecare thread va procesa maxim 20 de linii
-
-				char *line = strtok(paragraph, "\n");
-				int current_line = 0;
-				char *next_line = malloc(1);
-				*next_line = '\0';
-
-				//obtine chunck-ul din paragraf format din liniile care vor fi procesate de fiecare thread i
-				int i;
-				for (i = 0; i < threads_num; i++) {
-					char *paragraph_chunk = malloc(1);
-					*paragraph_chunk = '\0';
-					int start_line = NR_LINES * i;
-					int end_line;
-					if (lines_count < NR_LINES * (i + 1) - 1) { //unul din threaduri va primi mai putin de 20 de linii
-						end_line = lines_count;
-					}
-					else {
-						end_line = NR_LINES * (i + 1) - 1;
-					}
-					if (strlen(next_line) != 0) {
-						char *complete_line = (char *)malloc(strlen(next_line) + 2);
-						sprintf(complete_line, "%s\n", next_line);
-						int new_size = strlen(complete_line) + 1 + strlen(paragraph_chunk);
-						char *aux = (char *)realloc(paragraph_chunk, new_size);
-						if (!aux) {
-							exit(-1);
-						}
-						paragraph_chunk = aux;
-						strcat(paragraph_chunk, complete_line);
-					}
-					while (line != NULL) {
-						if (current_line >= start_line && current_line <= end_line) {
-							char *complete_line = (char *)malloc(strlen(line) + 2);
-							sprintf(complete_line, "%s\n", line);
-							int new_size = strlen(complete_line) + 1 + strlen(paragraph_chunk);
-							char *aux = (char *)realloc(paragraph_chunk, new_size);
-							if (!aux) {
-								exit(-1);
-							}
-							paragraph_chunk = aux;
-							strcat(paragraph_chunk, complete_line);
-						}
-						else {
-							//linia curenta va face parte din urmatorul chunk
-							char *aux = (char *)realloc(next_line, strlen(line) + 1);
-							if (!aux) {
-								exit(-1);
-							}
-							strcpy(aux, line);
-							next_line = aux;
-							current_line++;
-							break;
-						}
-						line = strtok(NULL, "\n");
-						current_line++;
-					}
-
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_SciFi, (void *)paragraph_chunk);
-					if (check_thread_start(r, HORROR_WORKER) == false) {
-						exit(-1);
-					}
-					if (line != NULL) {
-						line = strtok(NULL, "\n");
-					}
-				}
-
-				//paragraful final procesat care va fi trimis catre master
-				char *final_paragraph = malloc(1);
-				*final_paragraph = '\0';
-				for (i = 0; i < threads_num; i++) {
-					char *processed_paragraph_horror = NULL;
-			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph_horror);
-			        if (r) {
-			            printf("Eroare la asteptarea thread-ului %d\n", i);
-			            exit(-1);
-			        }
-			       // printf("Chunck procesat: %s\n", processed_paragraph_horror);
-			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph_horror) + 1 + strlen(final_paragraph));
-			        if (!aux) {
-			        	exit(-1);
-			        }
-			        final_paragraph = aux;
-			        strcat(final_paragraph, processed_paragraph_horror);
-	   		 	}   
-		   	//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			//    MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
-			    //printf("!!!!!!!!!!!!!!!!!!!!Paragaraful final procesat: %s\n", final_paragraph);
-			    free(paragraph);
-		 		paragraph = NULL;
-			}
-		}
-	}
-
-	//printf("S-au procesat si trimis toate paragrafele horror\n");
-	pthread_exit(NULL);
-}
-
-
-/*functia de thread executata de thread-ul reader din worker-ul fantasy*/
-void *worker_fantasy_reader_f(void *arg) {
-	
-	/*in thread-ul receiver de pe fiecare worker este primit mai intai de la master numarul de paragrafe 
-	de tipul asociat lui pe care urmeaza sa le primeasca de la master*/
-	//int num_paragraphs;
-	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, FANTASY_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	//printf("[FANTASY] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
-
-	int index = 0;
+	int nr = 0;
 	while(1) {
 	//for (index = 0; index < num_paragraphs; index++) {
 		//analizeaza numarul de linii din fiecare paragraf si porneste threadurile care fac procesarea paragrafului curent i
@@ -1500,52 +1068,64 @@ void *worker_fantasy_reader_f(void *arg) {
 		char *paragraph;
 		MPI_Status status;
 		int buffer_size;
-
-		MPI_Probe(MASTER, FANTASY_WORKER, MPI_COMM_WORLD, &status);
+		MPI_Probe(MASTER, SCIFI_WORKER, MPI_COMM_WORLD, &status);
 			
 		MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-
+		
 		MPI_Status status_recv;
 		paragraph = (char *)malloc(buffer_size * sizeof(char));
 
 		MPI_Request request = MPI_REQUEST_NULL;
-		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, FANTASY_WORKER, MPI_COMM_WORLD, &status_recv);
-		
-		
+		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, SCIFI_WORKER, MPI_COMM_WORLD, &status_recv);
+			
 		if (strcmp(paragraph, "DONE") == 0) {
-			//printf("A ajuns done in fantasy\n");
+			//printf("A ajuns done in horror\n");
 			break;
 		}
-		//printf("Paragraful care ajunge la worker fantasy: %s\n", paragraph);
+		if (nr == 0) {
+			paragraphs = (char **)malloc(sizeof(char *));
+			paragraphs[0] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[0], paragraph);
+		}
+		else {
 
+			char **aux = (char **)realloc(paragraphs, sizeof(char *) * (nr + 1));
+			if (!aux) {
+				exit(-1);
+			}
+			paragraphs = aux;
+			paragraphs[nr] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[nr], paragraph);
+		}
+		nr++;
+		free(paragraph);
+		paragraph = NULL;
+	}
+		
+	for (index = 0; index < nr; index++) {
+		char *paragraph = (char *)malloc(strlen(paragraphs[index]) + 1);
+		strcpy(paragraph, paragraphs[index]);
+		
 		int lines_count = get_num_lines(paragraph);
+		//printf("Paragraful care ajunge la worker reader: %s\n", paragraph);
 		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
 		if (lines_count <= NR_LINES) {
 			int r;
 			pthread_t processing_thread;
-			r = pthread_create(&processing_thread, NULL, worker_data_processing_fantasy, (void *)paragraph);
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
 			if (check_thread_start(r, HORROR_WORKER) == false) {
 				exit(-1);
 			}
 			char *processed_paragraph_horror = NULL;
 		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
 		    if (r != 0) {
-		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", FANTASY_WORKER);
+		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
 		    	exit(-1);
 		    }
-		   
-		    
-		    //trimite paragraful procesat catre master
-		//    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-		//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-		//    MPI_Buffer_attach(buffer_memory, buffer_dim);
+		 
+		  //  MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
 
-		    MPI_Bsend(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
-		    index++;
-		    //printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
-		 	//MPI_Buffer_detach(&buffer_memory, &buffer_dim);
-		 	free(paragraph);
-		 	paragraph = NULL;
+		 //   printf("Textul procesat in worker-ul HORROR este:%s\n", (char*)processed_paragraph_horror);
 		}
 		else {
 			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
@@ -1559,18 +1139,13 @@ void *worker_fantasy_reader_f(void *arg) {
 			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
 			
 			if (threads_num > P - 1) {
-				char *copy_paragraph = (char *)malloc((strlen(paragraph) + 1) * sizeof(char));
-				strcpy(copy_paragraph, paragraph);
-				char *final_paragraph = extract_and_process_chuncks(copy_paragraph, FANTASY_WORKER, lines_count);
+				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
 
 				//trimite paragraful final procesat catre MASTER
 				//printf("!!!Paragaraful final procesat: %s\n", final_paragraph);
-			//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			//    char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			//    MPI_Buffer_attach(buffer_memory, buffer_dim);
+				
 
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
+			//    MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 			}
 			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
 			else if (threads_num <= P - 1) {
@@ -1633,7 +1208,7 @@ void *worker_fantasy_reader_f(void *arg) {
 						current_line++;
 					}
 
-					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_fantasy, (void *)paragraph_chunk);
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
 					if (check_thread_start(r, HORROR_WORKER) == false) {
 						exit(-1);
 					}
@@ -1660,21 +1235,206 @@ void *worker_fantasy_reader_f(void *arg) {
 			        final_paragraph = aux;
 			        strcat(final_paragraph, processed_paragraph_horror);
 	   		 	}   
-		   	//	int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-			 //   char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-			 //   MPI_Buffer_attach(buffer_memory, buffer_dim);
+		   
+			    //	MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
 
-			    MPI_Bsend(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
-			    index++;
-			    //printf("!!!!!!!!!!!!!!!!!!!!Paragaraful final procesat fantasy: %s\n", final_paragraph);
-			    free(paragraph);
-		 		paragraph = NULL;
 			}
 		}
 	}
 
-	//printf("S-au procesat si trimis toate paragrafele horror\n");
+	//printf("S-au procesat si trimis toate paragrafele scifi\n");
 	pthread_exit(NULL);
+}
+
+/*functia de thread executata de thread-ul reader din worker-ul fantasy*/
+void *worker_fantasy_reader_f(void *arg) {
+	
+	/*in thread-ul receiver de pe fiecare worker este primit mai intai de la master numarul de paragrafe 
+	de tipul asociat lui pe care urmeaza sa le primeasca de la master*/
+
+	//int num_paragraphs;
+	//MPI_Recv(&num_paragraphs, 1, MPI_INT, MASTER, HORROR_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	//printf("[HORROR] Numar de paragrafe asteptate in worker: %d\n", num_paragraphs);
+	char **paragraphs = NULL;
+	int index = 0;
+	int nr = 0;
+	char *paragraph;
+	while(1) {
+	//for (index = 0; index < num_paragraphs; index++) {
+		//analizeaza numarul de linii din fiecare paragraf si porneste threadurile care fac procesarea paragrafului curent i
+		//face receive la paragraful care i-a fost trimis de catre thread-ul aferent tipului sau din master
+		MPI_Status status;
+		int buffer_size;
+		MPI_Probe(MASTER, FANTASY_WORKER, MPI_COMM_WORLD, &status);
+			
+		MPI_Get_count(&status, MPI_CHAR, &buffer_size);
+		
+		MPI_Status status_recv;
+		paragraph = (char *)malloc(buffer_size * sizeof(char));
+
+		MPI_Request request = MPI_REQUEST_NULL;
+		MPI_Recv(paragraph, buffer_size, MPI_CHAR, MASTER, FANTASY_WORKER, MPI_COMM_WORLD, &status_recv);
+			
+		if (strcmp(paragraph, "DONE") == 0) {
+			//printf("A ajuns done in horror\n");
+			break;
+		}
+		if (nr == 0) {
+			paragraphs = (char **)malloc(sizeof(char *));
+			paragraphs[0] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[0], paragraph);
+			
+		}
+		else {
+
+			char **aux = (char **)realloc(paragraphs, sizeof(char *) * (nr + 1));
+			if (!aux) {
+				exit(-1);
+			}
+			paragraphs = aux;
+			paragraphs[nr] = (char *)malloc(buffer_size * sizeof(char));
+			strcpy(paragraphs[nr], paragraph);
+		}
+		nr++;
+		free(paragraph);
+		paragraph = NULL;
+	}
+		
+	for (index = 0; index < nr; index++) {
+		char *paragraph = (char *)malloc(strlen(paragraphs[index]) + 1);
+		strcpy(paragraph, paragraphs[index]);
+		int lines_count = get_num_lines(paragraph);
+		//printf("Paragraful care ajunge la worker reader: %s\n", paragraph);
+		//daca paragraful are mai putin de 20 de linii, se porneste un singur thread de procesare
+		if (lines_count <= NR_LINES) {
+			int r;
+			pthread_t processing_thread;
+			r = pthread_create(&processing_thread, NULL, worker_data_processing_horror, (void *)paragraph);
+			if (check_thread_start(r, HORROR_WORKER) == false) {
+				exit(-1);
+			}
+			char *processed_paragraph_horror = NULL;
+		   	r = pthread_join(processing_thread, (void**)&processed_paragraph_horror);
+		    if (r != 0) {
+		    	printf("Eroare la asteptarea thread-ului de procesare in worker-ul %d\n", HORROR_WORKER);
+		    	exit(-1);
+		    }
+	
+		 //   MPI_Send(processed_paragraph_horror, strlen(processed_paragraph_horror) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);	
+		}
+		else {
+			int P = sysconf(_SC_NPROCESSORS_CONF); //numarul de threaduri disponibile
+			//printf("Se vor folosit mai multe threaduri pentru procesare\n");
+			//se pornesc maxim P-1 threaduri pentru procesare(o data sau de mai multe ori in functie de numarul de linii)
+			//printf("NUMARUL DE LINII: %d\n", lines_count);
+			int threads_num = lines_count / NR_LINES + ceil((lines_count % NR_LINES) / (float)NR_LINES); //numarul de thread-uri de care ar fi nevoie pt a imparti procesarea liniilor
+			//printf("numarul de threaduri de care avem nevoie este: %d\n", threads_num);
+			//printf("numar disponibile: %d\n", P - 1);
+
+			//trebuie sa folosim un thread de mai multe ori pentru a procesa paragraful
+			
+			if (threads_num > P - 1) {
+				char *final_paragraph = extract_and_process_chuncks(paragraph, HORROR_WORKER, lines_count);
+
+				//trimite paragraful final procesat catre MASTER
+			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
+			
+			}
+			//threadurile disponibile sunt suficiente pentru a procesa paragraful pornindu-le o singura data
+			else if (threads_num <= P - 1) {
+				
+				pthread_t processing_threads[threads_num]; //fiecare thread va procesa maxim 20 de linii
+
+				char *line = strtok(paragraph, "\n");
+				int current_line = 0;
+				char *next_line = malloc(1);
+				*next_line = '\0';
+
+				//obtine chunck-ul din paragraf format din liniile care vor fi procesate de fiecare thread i
+				int i;
+				for (i = 0; i < threads_num; i++) {
+					char *paragraph_chunk = malloc(1);
+					*paragraph_chunk = '\0';
+					int start_line = NR_LINES * i;
+					int end_line;
+					if (lines_count < NR_LINES * (i + 1) - 1) { //unul din threaduri va primi mai putin de 20 de linii
+						end_line = lines_count;
+					}
+					else {
+						end_line = NR_LINES * (i + 1) - 1;
+					}
+					if (strlen(next_line) != 0) {
+						char *complete_line = (char *)malloc(strlen(next_line) + 2);
+						sprintf(complete_line, "%s\n", next_line);
+						int new_size = strlen(complete_line) + 1 + strlen(paragraph_chunk);
+						char *aux = (char *)realloc(paragraph_chunk, new_size);
+						if (!aux) {
+							exit(-1);
+						}
+						paragraph_chunk = aux;
+						strcat(paragraph_chunk, complete_line);
+					}
+					while (line != NULL) {
+						if (current_line >= start_line && current_line <= end_line) {
+							char *complete_line = (char *)malloc(strlen(line) + 2);
+							sprintf(complete_line, "%s\n", line);
+							int new_size = strlen(complete_line) + 1 + strlen(paragraph_chunk);
+							char *aux = (char *)realloc(paragraph_chunk, new_size);
+							if (!aux) {
+								exit(-1);
+							}
+							paragraph_chunk = aux;
+							strcat(paragraph_chunk, complete_line);
+						}
+						else {
+							//linia curenta va face parte din urmatorul chunk
+							char *aux = (char *)realloc(next_line, strlen(line) + 1);
+							if (!aux) {
+								exit(-1);
+							}
+							strcpy(aux, line);
+							next_line = aux;
+							current_line++;
+							break;
+						}
+						line = strtok(NULL, "\n");
+						current_line++;
+					}
+
+					int r = pthread_create(&processing_threads[i], NULL, worker_data_processing_horror, (void *)paragraph_chunk);
+					if (check_thread_start(r, HORROR_WORKER) == false) {
+						exit(-1);
+					}
+					if (line != NULL) {
+						line = strtok(NULL, "\n");
+					}
+				}
+
+				//paragraful final procesat care va fi trimis catre master
+				char *final_paragraph = malloc(1);
+				*final_paragraph = '\0';
+				for (i = 0; i < threads_num; i++) {
+					char *processed_paragraph_horror = NULL;
+			        int r = pthread_join(processing_threads[i], (void**)&processed_paragraph_horror);
+			        if (r) {
+			            printf("Eroare la asteptarea thread-ului %d\n", i);
+			            exit(-1);
+			        }
+			       // printf("Chunck procesat: %s\n", processed_paragraph_horror);
+			        char *aux = (char *)realloc(final_paragraph, strlen(processed_paragraph_horror) + 1 + strlen(final_paragraph));
+			        if (!aux) {
+			        	exit(-1);
+			        }
+			        final_paragraph = aux;
+			        strcat(final_paragraph, processed_paragraph_horror);
+	   		 	}   
+			  //  MPI_Send(final_paragraph, strlen(final_paragraph) + 1, MPI_CHAR, MASTER, index, MPI_COMM_WORLD);
+			}
+		}
+	}
+
+	pthread_exit(NULL);
+
 }
 
 
@@ -1700,14 +1460,7 @@ int main (int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
     MPI_Get_processor_name(hostname, &len);
-
-    int buffer_dim = MAX_SIZE + MPI_BSEND_OVERHEAD;
-	char *buffer_memory = (char *)malloc(buffer_dim * sizeof(char));
-	MPI_Buffer_attach(buffer_memory, buffer_dim);
-
-
-	MPI_Request request = MPI_REQUEST_NULL;
-
+ 
     if (rank == MASTER) {
     	//printf("\n");
     	
@@ -1779,8 +1532,9 @@ int main (int argc, char *argv[]) {
     	int comedy_par = 0;
     	int sciFi_par = 0;
     	int fantasy_par = 0;
-
+/*
 		while ((result = getline(&line_buffer, &buffer_size, fptr)) != -1) {
+		
 			if (strcmp(line_buffer, "horror\n") == 0) {
 				char *processed_paragraph;
 				MPI_Status status;
@@ -1789,11 +1543,10 @@ int main (int argc, char *argv[]) {
 				MPI_Probe(HORROR_WORKER, horror_par, MPI_COMM_WORLD, &status);
 								
 				MPI_Get_count(&status, MPI_CHAR, &buffer_size);
-							
+
 				processed_paragraph = (char *)malloc(buffer_size * sizeof(char));
 				MPI_Recv(processed_paragraph, buffer_size, MPI_CHAR, HORROR_WORKER, horror_par, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				//printf("horror\n%s\n", processed_paragraph);
-
+				
 				char *append_str = (char *)malloc(strlen(processed_paragraph) + strlen("horror\n") + 2);
 				sprintf(append_str, "horror\n%s\n", processed_paragraph);
 
@@ -1805,7 +1558,7 @@ int main (int argc, char *argv[]) {
 				final_text = aux;
 				strcat(final_text, append_str);
 				
-				//printf("%s", final_text);
+				//printf("TEXT FINAL: %s", final_text);
 				horror_par++;
 			}
 			if (strcmp(line_buffer, "comedy\n") == 0) {
@@ -1915,13 +1668,12 @@ int main (int argc, char *argv[]) {
     		exit(-1);
     	}
 
-    	fprintf(out_fptr, "%s", final_text);
+    	fprintf(out_fptr, "%s", final_text);*/
 
     	//printf("%s", final_text);
 	}
     else {
     	
-
     	//in fiecare worker este pornit initial thread-ul 'reader' care recepteaza datele trimise de master si porneste ulterior threadurile de procesare
         pthread_t reader;
         int r = 0;
@@ -1946,6 +1698,8 @@ int main (int argc, char *argv[]) {
     		printf("Eroare la asteptarea thread-ului reader din worker-ul %d\n", rank);
     		exit(-1);
     	}
+
+    	
     }
 
     MPI_Finalize();   
