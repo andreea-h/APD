@@ -67,7 +67,7 @@ def run_tests():
 def check_if_multiple_read():
     files = get_files(IN_FOLDER)
     command = "mpirun -oversubscribe -np 5 ./main " + IN_FOLDER + "/" + files[-1] + \
-                " & sleep 0.5 && lsof tests/in/input3.txt | wc -l"
+                " & sleep 0.5 && lsof tests/in/input5.txt | wc -l"
 
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, _ = p.communicate()
