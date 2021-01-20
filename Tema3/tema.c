@@ -441,19 +441,6 @@ void *master_f_fantasy(void *arg) {
 	pthread_exit(NULL);
 }
 
-/*returneaza numarul de linii pe care le are un paragraf*/
-int get_num_lines(char *paragraph) {
-	int result = 0;
-	//numarul de linii = nr de caractere \n din paragraful primit de threadul reader al unui worker
-	int i;
-	for (i = 0; i < strlen(paragraph); i++) {
-		if (paragraph[i] == '\n') {
-			result++;
-		}
-	}
-	return result;
-}
-
 /*returneaza true daca c este litera*/
 bool isLetter(char c) {
 	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));

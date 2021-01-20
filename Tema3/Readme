@@ -12,7 +12,7 @@ cat si la nivelul workerilor. Pe laptopul pe care am testat tema numarul firelor
 de executie disponibile este 8.
 	
 	La nivelul nodului master realizez citirea fisierului in 4 threaduri, fiecare
-thread ocupandu-se de cate un tip de paragrafe. Din main master sunt pornite cele 
+thread ocupandu-se de cate un tip de paragraf. Din main master sunt pornite cele 
 4 threaduri de citire, fiecare thread executand propria sa functie. In fiecare 
 functie de thread executata de threadurile reader ale nodului master este deschis 
 fisierul, parcurs linie cu linie, si sunt identificate si trimise catre workerul 
@@ -34,7 +34,7 @@ vor memora paragrafele pe care trebuie sa le trimita catre procesare intr-un vec
 de stringuri. Mai apoi, tot in cadrul threadului reader este parcurs vectorul
 care contine paragrafele de un anume tip care trebuie prelucrate. Pentru
 fiecare paragraf este realizata impartirea acestuia in chunkuri de cate maxim 20 de 
-linii fiecare, memorand chunkurile intr-o matrice in care fiecare linie este 
+linii fiecare, memorand chunkurile intr-o matrice in care fiecare element este 
 un chunk care trebuie trimis catre procesare. In functie de numarul de chunkuri 
 obtinute pentru pornite un numar de minim 1, maxim P-1 threaduri, care realizeaza 
 fiecare dintre ele procesarea unei bucati de maxim 20 de linii din paragraf. 
@@ -42,7 +42,7 @@ Preluand valoarea intoarsa la join se face concat la paragraful final procesat c
 ceea ce a intors functia de procesare executata de threadurile de procesare.
 Parcurgand matricea care retine chunkurile din paragraf se verifica mai departe 
 daca trebuie pornit un nou set de maxim P-1 threaduri pentru a se procesa inca
-maxim (P-1)*20 linii in paralel in cele P-1 fire de executie. Dupa ce a fost 
+maxim (P-1)*20 linii in paralel in maxim P-1 fire de executie. Dupa ce a fost 
 procesat intreg paragraful, acesta este trimis catre nodul master.
 
 	Asa cum am mentionat anterior, am ales sa fac operatia de receive a 
@@ -72,6 +72,7 @@ threadurilor reader din master, am observat o mica scadere a timpului de executi
 pentru testele 4 si 5.
 
 
+	Scorul pe care il obtin pe checkerul local este 8 puncte.
 	Am testat tema atat pe local pe sistemul Linux, pe laptopul personal, cat 
 si pe o masina virtuala Ubuntu. Pe local solutia nu scaleaza (scorul dat de 
 checker este 8p), in timp ce pe masina virtuala timpii pentru rularea secventiala
@@ -79,8 +80,36 @@ a testelor 4 si 5 sunt considerabili mai mari decat cei obtinuti pe local;
 de aceea pe masina virtuala pe care am testat am obtinut scorul 10.
 Totusi, timpii de executie pentru testele 4 si 5 pentru care se verifica 
 scalabilitatea nu consider ca sunt suficient de satisfacatori pentru a se putea
-considera ca solutia mea scaleaza: aprox. 18s pentru testul4, respectiv 27s 
+considera ca solutia mea scaleaza cu succes: aprox. 14s pentru testul 4, respectiv 24s 
 pentru testul 5. Primele 3 teste au timpi de executie mici (ceva mai mari decat 
-la secvential datorita overhead-ului generat de MPI si threads).
+la secvential din cauza overhead-ului generat de MPI si threads).
+	Consider ca, cel mai probabil, solutia mea nu aduce o performanta prea 
+insemnata a timpilor de exectie pentru testele 4 si 5 din cauza overhead-ului 
+generat de pornirea repetata a threadurilor de procesare in cadrul celor
+4 noduri worker, comparatie pentru scalabilitate depinzand de timpii de executie
+ai rularii secventiale la care ne raportam.
+	
+Timpi de executie obtinuti pe local:
+-rularea secventiala:
+Test input1.out took 0.00875544548034668 seconds
+Test input1.txt took 0.0019342899322509766 seconds
+Test input2.txt took 0.11919593811035156 seconds
+Test input3.txt took 0.3856997489929199 seconds
+Test input4.txt took 6.4559643268585205 seconds
+Test input5.txt took 9.440842151641846 seconds
+
+-rularea testelor:
+Test input1.out took 0.4655890464782715 seconds
+Test input1.txt took 0.4657881259918213 seconds
+Test input2.txt took 0.7188289165496826 seconds
+Test input3.txt took 1.2197058200836182 seconds
+Test input4.txt took 14.748279809951782 seconds
+Test input5.txt took 24.221928358078003 seconds
+
+//Aici solutia clar nu scaleaza (scorul dat de checker este 8)
+
+Timpi de executie obtinuti de masina virtuala:
+-rularea secventiala:
 
 
+-rularea testelor:
