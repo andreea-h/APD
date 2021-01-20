@@ -64,30 +64,33 @@ corecta paragrafele procesate. Mai exact, parcurg array-ul care contine
 valori de 1,2,3,4 pentru a identifica ordinea, preluand din vectorul de stringuri 
 corespunzator tipului, paragraful procesat. 
 
-	In implementare am urmarit sa maximizez folosirea threadurilor facand operatiile
-de MPI_Send si MPI_Recv la nivelul acestora. De exemplu, intr-o varianta anterioara
-de implementare faceam operatia de receive a paragrafelor procesate la nivelul
-nodului master in firul principal de executie(main). Facand receive-ul la nivelul 
-threadurilor reader din master, am observat o mica scadere a timpului de executie 
-pentru testele 4 si 5.
+	In implementare am urmarit sa maximizez folosirea threadurilor, facand 
+operatiile de MPI_Send si MPI_Recv la nivelul acestora. De exemplu, intr-o varianta 
+anterioara de implementare faceam operatia de receive a paragrafelor procesate la 
+nivelul nodului master in firul principal de executie(main). Facand receive-ul la
+nivelul threadurilor reader din master, am observat o mica scadere a timpului de 
+executie pentru testele 4 si 5.
 
-
-	Scorul pe care il obtin pe checkerul local este 8 puncte.
+	Am testat tema exclusiv pe Linux.
+	La testarea temei pe local am intr-o situatie punctajul 8 pe checker,
+in alta situatie punctajul 10 (pe local 8 puncte, pe masina virtuala 10 puncte).
 	Am testat tema atat pe local pe sistemul Linux, pe laptopul personal, cat 
-si pe o masina virtuala Ubuntu. Pe local solutia nu scaleaza (scorul dat de 
+si pe o masina virtuala Ubuntu. Pe local, pe Linux, solutia nu scaleaza (scorul dat de 
 checker este 8p), in timp ce pe masina virtuala timpii pentru rularea secventiala
-a testelor 4 si 5 sunt considerabili mai mari decat cei obtinuti pe local;
-de aceea pe masina virtuala pe care am testat am obtinut scorul 10.
+a testelor 4 si 5 sunt considerabil mai mari decat cei obtinuti pe local;
+de aceea pe masina virtuala pe care am testat am obtinut mereu scorul 10.
 Totusi, timpii de executie pentru testele 4 si 5 pentru care se verifica 
-scalabilitatea nu consider ca sunt suficient de satisfacatori pentru a se putea
-considera ca solutia mea scaleaza cu succes: aprox. 14s pentru testul 4, respectiv 24s 
-pentru testul 5. Primele 3 teste au timpi de executie mici (ceva mai mari decat 
-la secvential din cauza overhead-ului generat de MPI si threads).
+scalabilitatea au fost aproximativ acceasi atat pe local, cat si pe masina virtuala: 
+aprox. 14s pentru testul 4, respectiv 24s pentru testul 5. Primele 3 teste au timpi 
+de executie mici (ceva mai mari decat la secvential din cauza overhead-ului generat 
+de MPI si pthreads).
 	Consider ca, cel mai probabil, solutia mea nu aduce o performanta prea 
 insemnata a timpilor de exectie pentru testele 4 si 5 din cauza overhead-ului 
 generat de pornirea repetata a threadurilor de procesare in cadrul celor
-4 noduri worker, comparatie pentru scalabilitate depinzand de timpii de executie
-ai rularii secventiale la care ne raportam.
+4 noduri worker.
+
+	 Comparatia facuta pentru verificarea scalabilitatii solutiei depinde de 
+timpii de executie ai rularii secventiale la care ne raportam.
 	
 Timpi de executie obtinuti pe local:
 -rularea secventiala:
@@ -105,11 +108,22 @@ Test input2.txt took 0.7188289165496826 seconds
 Test input3.txt took 1.2197058200836182 seconds
 Test input4.txt took 14.748279809951782 seconds
 Test input5.txt took 24.221928358078003 seconds
-
 //Aici solutia clar nu scaleaza (scorul dat de checker este 8)
 
 Timpi de executie obtinuti de masina virtuala:
 -rularea secventiala:
-
+Test input1.txt took 0.0028162002563476562 seconds
+Test input2.txt took 0.37322402000427246 seconds
+Test input3.txt took 1.1659374237060547 seconds
+Test input4.txt took 21.58519148826599 seconds
+Test input5.txt took 31.43218159675598 seconds
 
 -rularea testelor:
+Test input1.txt took 0.5856266021728516 seconds
+Test input2.txt took 0.6541571617126465 seconds
+Test input3.txt took 1.0931568145751953 seconds
+Test input4.txt took 14.37177062034607 seconds
+Test input5.txt took 22.649929761886597 seconds
+//Pe masina virtuala scorul obtinut pe checker este 10 puncte.
+
+
