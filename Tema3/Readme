@@ -1,0 +1,86 @@
+Tema3 APD - Algoritmi paraleli in sisteme distribuite
+student: Horovei Andreea-Georgiana, 335CC
+
+
+	Am realizat implementarea procesatorului de text distrbuit conform cerintelor
+din enunt, folosind MPI, citind si trimitand textul in paralel din master catre 
+workeri si separand logica de citire si procesare in workeri conform cu specifi-
+catiile din enunt.
+	
+	In implementare am impartit munca pe threaduri atat la nivelul nodului master,
+cat si la nivelul workerilor. Pe laptopul pe care am testat tema numarul firelor 
+de executie disponibile este 8.
+	
+	La nivelul nodului master realizez citirea fisierului in 4 threaduri, fiecare
+thread ocupandu-se de cate un tip de paragrafe. Din main master sunt pornite cele 
+4 threaduri de citire, fiecare thread executand propria sa functie. In fiecare 
+functie de thread executata de threadurile reader ale nodului master este deschis 
+fisierul, parcurs linie cu linie, si sunt identificate si trimise catre workerul 
+aferent tipului sau paragrafele de tipul asociat threadului respectiv. 
+(de exemplu primul thread reader va citi si va trimite catre workerul horror
+doar paragrafele de tipul horror). In plus, dupa ce sunt trimise toate paragrafele
+avand tipul asociat threadului, din fiecare thread este trimis catre workerul
+asociat un mesaj "DONE" prin care workerul va detecta ca a primit toate paragrafele
+pe care le are de procesat si nu mai trebuie sa astepte primirea unui alt
+paragraf. Tot la nivelul threadurilor reader ale nodului master am facut si receive
+la paragrafele procesate avand tipul asociat fiecarui thread, memorand in 4 vectori
+paragrafele procesate din cele 4 tipuri.
+
+	La nivelul workerilor am lucrat, de asemenea, cu threaduri, realizand separatia 
+intre partea de citire/receive si partea de procesare. In main worker am pornit 
+un fir de executie care se va ocupa de primirea paragrafelor care trebuie
+procesate de la nodul master. Cele 4 threaduri reader de pe cei patru workeri 
+vor memora paragrafele pe care trebuie sa le trimita catre procesare intr-un vector
+de stringuri. Mai apoi, tot in cadrul threadului reader este parcurs vectorul
+care contine paragrafele de un anume tip care trebuie prelucrate. Pentru
+fiecare paragraf este realizata impartirea acestuia in chunkuri de cate maxim 20 de 
+linii fiecare, memorand chunkurile intr-o matrice in care fiecare linie este 
+un chunk care trebuie trimis catre procesare. In functie de numarul de chunkuri 
+obtinute pentru pornite un numar de minim 1, maxim P-1 threaduri, care realizeaza 
+fiecare dintre ele procesarea unei bucati de maxim 20 de linii din paragraf. 
+Preluand valoarea intoarsa la join se face concat la paragraful final procesat cu
+ceea ce a intors functia de procesare executata de threadurile de procesare.
+Parcurgand matricea care retine chunkurile din paragraf se verifica mai departe 
+daca trebuie pornit un nou set de maxim P-1 threaduri pentru a se procesa inca
+maxim (P-1)*20 linii in paralel in cele P-1 fire de executie. Dupa ce a fost 
+procesat intreg paragraful, acesta este trimis catre nodul master.
+
+	Asa cum am mentionat anterior, am ales sa fac operatia de receive a 
+paragrafrelor procesate la nivelul celor 4 threaduri reader ale nodului master. 
+Fiecare thread  se ocupa sa primeasca in ordinea din fisier paragrafele de tipul 
+asociat lui si sa le memoreze intr-un array de stringuri. Operatia de scriere a 
+textului final procesat in fisier am realizat-o in main master.
+
+	Pentru a evita sa deschid din nou fisierul de intrare in main master in scopul
+identificarii ordinii paragrafelor in fisier, am ales ca in threadul reader al 
+nodului master sa realizez si memorarea ordinii paragrafelor, pe masura ce citesc 
+fisierul de intrare. Ordinea paragrafelor o retin prin intermediul unui array 
+continand pe pozitia i una din valorile 1,2,3,4 (1-paragraf horror, 2-comedy, 3-
+science-fiction,4-fantasy). Astfel, in functie de numele paragrafului identificat
+in fisier memorez valoarea corespunzatoare in array-ul ce retine ordinea.
+In main master folosesc acest array care retine ordinea si cei 4 vectori care 
+contin paragrafele procesate de fiecare tip pentru a scrie in fisier in oridinea
+corecta paragrafele procesate. Mai exact, parcurg array-ul care contine
+valori de 1,2,3,4 pentru a identifica ordinea, preluand din vectorul de stringuri 
+corespunzator tipului, paragraful procesat. 
+
+	In implementare am urmarit sa maximizez folosirea threadurilor facand operatiile
+de MPI_Send si MPI_Recv la nivelul acestora. De exemplu, intr-o varianta anterioara
+de implementare faceam operatia de receive a paragrafelor procesate la nivelul
+nodului master in firul principal de executie(main). Facand receive-ul la nivelul 
+threadurilor reader din master, am observat o mica scadere a timpului de executie 
+pentru testele 4 si 5.
+
+
+	Am testat tema atat pe local pe sistemul Linux, pe laptopul personal, cat 
+si pe o masina virtuala Ubuntu. Pe local solutia nu scaleaza (scorul dat de 
+checker este 8p), in timp ce pe masina virtuala timpii pentru rularea secventiala
+a testelor 4 si 5 sunt considerabili mai mari decat cei obtinuti pe local;
+de aceea pe masina virtuala pe care am testat am obtinut scorul 10.
+Totusi, timpii de executie pentru testele 4 si 5 pentru care se verifica 
+scalabilitatea nu consider ca sunt suficient de satisfacatori pentru a se putea
+considera ca solutia mea scaleaza: aprox. 18s pentru testul4, respectiv 27s 
+pentru testul 5. Primele 3 teste au timpi de executie mici (ceva mai mari decat 
+la secvential datorita overhead-ului generat de MPI si threads).
+
+
