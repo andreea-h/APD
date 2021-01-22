@@ -1,0 +1,20 @@
+Readme Lab 10 APD
+Horovei Andreea, 335CC
+
+Am implementat toate cerintele. 
+Am obtinut rezultatul corect, inclusiv matricea de topologie a clusterului.
+ 0  1  1  0  0  0  0  0  0  0  0  0 
+ 1  0  1  0  0  0  0  0  0  0  0  0 
+ 1  1  0  1  0  0  0  0  0  0  0  0 
+ 0  0  1  0  1  1  0  0  0  0  0  0 
+ 0  0  0  1  0  0  0  0  0  0  0  1 
+ 0  0  0  1  0  0  1  0  0  1  0  1 
+ 0  0  0  0  0  1  0  1  0  0  0  0 
+ 0  0  0  0  0  0  1  0  1  1  0  0 
+ 0  0  0  0  0  0  0  1  0  1  0  0 
+ 0  0  0  0  0  1  0  1  1  0  1  0 
+ 0  0  0  0  0  0  0  0  0  1  0  0 
+ 0  0  0  0  1  1  0  0  0  0  0  0 
+
+
+
