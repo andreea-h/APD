@@ -1,0 +1,39 @@
+
+
+int MPI_Scatter(void* send_data, 
+				int send_count, 
+				MPI_Datatype send_datatype, 
+				void* recv_data, 
+				int recv_count, 
+				MPI_Datatype recv_datatype, 
+				int root, 
+				MPI_Comm communicator)
+
+		send_data (↓) - reprezintă datele care sunt împărțite și trimise către procesele din comunicator
+		send_count (↓) - reprezintă dimensiunea bucății care revine fiecărui proces (de regulă se pune ca fiind dimensiunea_totală / număr_de_procese).
+		send_datatype (↓) - tipul datelor trimise către procese
+		recv_data (↑) - reprezintă datele care sunt primite și stocate de către procese
+		recv_count (↓) - dimensiunea datelor primite (de regulă dimensiunea_totală / număr_de_procese)
+		recv_datatype (↓) - tipul datelor primite de către procese (de regulă este același cu send_datatype)
+		root (↓) - identificatorul procesului care împarte datele și care le trimite către procesele din comunicator, inclusiv lui însuși
+		communicator (↓) - comunicatorul din care fac parte procesele (de regulă MPI_COMM_WORLD)
+
+
+
+int MPI_Gather(void* send_data, 
+			int send_count, 
+			MPI_Datatype send_datatype, 
+			void* recv_data, 
+			int recv_count, 
+			MPI_Datatype recv_datatype, 
+			int root,
+			MPI_Comm communicator)
+ 
+		send_data (↓) - reprezintă datele care trimise de fiecare proces către procesul cu id-ul root
+		send_count (↓) - reprezintă dimensiunea bucății trimisă de fiecare proces (de regulă se pune ca fiind dimensiunea_totală / număr_de_procese).
+		send_datatype (↓) - tipul datelor trimise de către procese
+		recv_data (↑) - reprezintă datele care sunt primite și stocate de către procesul root
+		recv_count (↓) - dimensiunea datelor primite (de regulă dimensiunea_totală / număr_de_procese)
+		recv_datatype (↓) - tipul datelor primite de către procesul root (de regulă este același cu send_datatype)
+		root (↓) - identificatorul procesului care primește datele (inclusiv de la el însuși)
+		communicator (↓) - comunicatorul din care fac parte procesele (de regulă MPI_COMM_WORLD)

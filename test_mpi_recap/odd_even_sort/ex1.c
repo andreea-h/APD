@@ -65,24 +65,24 @@ int main (int argc, char *argv[])
     int process_value; //valorea din vector detinuta de procesul curent 
    
 
-    if (rank == 0) { //genereaza vectorul si il trimite catre celelalte procese
+    if (rank == 0) { //genereaza vectorul si trimite catre fiecare proces valorea care ii este asignata acestuia
         init();
         for (i = 1; i < numtasks; i++) {
-            MPI_Send(v, N, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&v[i], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
         }   
         printf("vectorul generat: ");
         for (i = 0; i < N; i++) {
             printf("%d ", v[i]);
         }
         printf("\n");
+        process_value = v[0];
     }
     else {
         //primeste vectorul de la celelalte procese
-        v = (int *)malloc(N * sizeof(int));
-        MPI_Recv(v, N, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      
+        MPI_Recv(&process_value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     
-    process_value = v[rank];
 
     //printf("Valorea retinuta de procesul %d este %d\n", rank, process_value);
 
@@ -146,7 +146,7 @@ int main (int argc, char *argv[])
     if (rank == 0) {
         //primeste valorile de pe toate procesele si le completeaza in vector
         int i;
-        for (i = 1; i < numtasks ; i++) {
+        for (i = 1; i < numtasks; i++) {
             int recv_num;
             MPI_Recv(&recv_num, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             v[i] = recv_num;
